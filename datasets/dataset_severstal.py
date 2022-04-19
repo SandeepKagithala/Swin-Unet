@@ -46,7 +46,7 @@ class RandomGenerator(object):
         return sample
 
 
-class Synapse_dataset(Dataset):
+class Severstal_dataset(Dataset):
     def __init__(self, base_dir, list_dir, split, transform=None):
         self.transform = transform  # using transform in torch!
         self.split = split
@@ -57,16 +57,16 @@ class Synapse_dataset(Dataset):
         return len(self.sample_list)
 
     def __getitem__(self, idx):
-        if self.split == "train":
-            slice_name = self.sample_list[idx].strip('\n')
-            data_path = os.path.join(self.data_dir, slice_name+'.npz')
-            data = np.load(data_path)
-            image, label = data['image'], data['label']
-        else:
-            vol_name = self.sample_list[idx].strip('\n')
-            filepath = self.data_dir + "/{}.npy.h5".format(vol_name)
-            data = h5py.File(filepath)
-            image, label = data['image'][:], data['label'][:]
+        # if self.split == "train":
+		slice_name = self.sample_list[idx].strip('\n')
+		data_path = os.path.join(self.data_dir, slice_name+'.npz')
+		data = np.load(data_path)
+		image, label = data['image'], data['label']
+        # else:
+            # vol_name = self.sample_list[idx].strip('\n')
+            # filepath = self.data_dir + "/{}.npy.h5".format(vol_name)
+            # data = h5py.File(filepath)
+            # image, label = data['image'][:], data['label'][:]
 
         sample = {'image': image, 'label': label}
         if self.transform:
