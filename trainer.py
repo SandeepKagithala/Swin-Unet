@@ -34,8 +34,8 @@ def trainer_severstal(args, model, snapshot_path):
     def worker_init_fn(worker_id):
         random.seed(args.seed + worker_id)
 
-    trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=True,
-                             worker_init_fn=worker_init_fn)
+    #trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=8, worker_init_fn=worker_init_fn)
+    trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, pin_memory=True)
     if args.n_gpu > 1:
         model = nn.DataParallel(model)
     model.train()
@@ -52,7 +52,11 @@ def trainer_severstal(args, model, snapshot_path):
     for epoch_num in iterator:
         for i_batch, sampled_batch in enumerate(trainloader):
             image_batch, label_batch = sampled_batch['image'], sampled_batch['label']
+            # print("Image Shape from trainloader : {}".format(image_batch.shape))
+            # print("Mask Shape from trainloader : {}".format(label_batch.shape))
             image_batch, label_batch = image_batch.cuda(), label_batch.cuda()
+            # print("Image Shape from trainloader : {}".format(image_batch.shape))
+            # print("Mask Shape from trainloader : {}".format(label_batch.shape))
             outputs = model(image_batch)
             loss_ce = ce_loss(outputs, label_batch[:].long())
             loss_dice = dice_loss(outputs, label_batch, softmax=True)
@@ -87,7 +91,7 @@ def trainer_severstal(args, model, snapshot_path):
             logging.info("save model to {}".format(save_mode_path))
 
         if epoch_num >= max_epoch - 1:
-            save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '.pth')
+            save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num+1) + '.pth')
             torch.save(model.state_dict(), save_mode_path)
             logging.info("save model to {}".format(save_mode_path))
             iterator.close()

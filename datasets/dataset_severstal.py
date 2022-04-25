@@ -58,10 +58,10 @@ class Severstal_dataset(Dataset):
 
     def __getitem__(self, idx):
         # if self.split == "train":
-		slice_name = self.sample_list[idx].strip('\n')
-		data_path = os.path.join(self.data_dir, slice_name+'.npz')
-		data = np.load(data_path)
-		image, label = data['image'], data['label']
+        slice_name = self.sample_list[idx].strip('\n')
+        data_path = os.path.join(self.data_dir, slice_name+'.npz')
+        data = np.load(data_path)
+        image, label = data['image'], data['label']
         # else:
             # vol_name = self.sample_list[idx].strip('\n')
             # filepath = self.data_dir + "/{}.npy.h5".format(vol_name)

@@ -511,16 +511,16 @@ class PatchEmbed(nn.Module):
     r""" Image to Patch Embedding
 
     Args:
-        img_size (int): Image size.  Default: 224.
+        img_size (tuple): Image size.  Default: (224,224).
         patch_size (int): Patch token size. Default: 4.
         in_chans (int): Number of input image channels. Default: 3.
         embed_dim (int): Number of linear projection output channels. Default: 96.
         norm_layer (nn.Module, optional): Normalization layer. Default: None
     """
 
-    def __init__(self, img_size=224, patch_size=4, in_chans=3, embed_dim=96, norm_layer=None):
+    def __init__(self, img_size=(224, 224), patch_size=4, in_chans=3, embed_dim=96, norm_layer=None):
         super().__init__()
-        img_size = to_2tuple(img_size)
+        #img_size = to_2tuple(img_size)
         patch_size = to_2tuple(patch_size)
         patches_resolution = [img_size[0] // patch_size[0], img_size[1] // patch_size[1]]
         self.img_size = img_size
@@ -561,7 +561,7 @@ class SwinTransformerSys(nn.Module):
           https://arxiv.org/pdf/2103.14030
 
     Args:
-        img_size (int | tuple(int)): Input image size. Default 224
+        img_size (tuple(int)): Input image size. Default (224, 224)
         patch_size (int | tuple(int)): Patch size. Default: 4
         in_chans (int): Number of input image channels. Default: 3
         num_classes (int): Number of classes for classification head. Default: 1000
@@ -581,7 +581,7 @@ class SwinTransformerSys(nn.Module):
         use_checkpoint (bool): Whether to use checkpointing to save memory. Default: False
     """
 
-    def __init__(self, img_size=224, patch_size=4, in_chans=3, num_classes=1000,
+    def __init__(self, img_size=(224, 224), patch_size=4, in_chans=3, num_classes=1000,
                  embed_dim=96, depths=[2, 2, 2, 2], depths_decoder=[1, 2, 2, 2], num_heads=[3, 6, 12, 24],
                  window_size=7, mlp_ratio=4., qkv_bias=True, qk_scale=None,
                  drop_rate=0., attn_drop_rate=0., drop_path_rate=0.1,
@@ -669,7 +669,7 @@ class SwinTransformerSys(nn.Module):
 
         if self.final_upsample == "expand_first":
             print("---final upsample expand_first---")
-            self.up = FinalPatchExpand_X4(input_resolution=(img_size//patch_size,img_size//patch_size),dim_scale=4,dim=embed_dim)
+            self.up = FinalPatchExpand_X4(input_resolution=(img_size[0]//patch_size,img_size[1]//patch_size),dim_scale=4,dim=embed_dim)
             self.output = nn.Conv2d(in_channels=embed_dim,out_channels=self.num_classes,kernel_size=1,bias=False)
 
         self.apply(self._init_weights)

@@ -25,7 +25,7 @@ _C.DATA.DATA_PATH = ''
 # Dataset name
 _C.DATA.DATASET = 'imagenet'
 # Input image size
-_C.DATA.IMG_SIZE = 224
+_C.DATA.IMG_SIZE = (224,224) # Modified from 224 to tuple (128,800)
 # Interpolation to resize image (random, bilinear, bicubic)
 _C.DATA.INTERPOLATION = 'bicubic'
 # Use zipped dataset instead of folder dataset
@@ -50,7 +50,7 @@ _C.MODEL.NAME = 'swin_tiny_patch4_window7_224'
 _C.MODEL.PRETRAIN_CKPT = './pretrained_ckpt/swin_tiny_patch4_window7_224.pth'
 _C.MODEL.RESUME = ''
 # Number of classes, overwritten in data preparation
-_C.MODEL.NUM_CLASSES = 5 #SK - Modified from 1000 to 5 classes
+_C.MODEL.NUM_CLASSES = 4 #SK - Modified from 1000 to 4 classes
 # Dropout rate
 _C.MODEL.DROP_RATE = 0.0
 # Drop path rate
@@ -61,7 +61,7 @@ _C.MODEL.LABEL_SMOOTHING = 0.1
 # Swin Transformer parameters
 _C.MODEL.SWIN = CN()
 _C.MODEL.SWIN.PATCH_SIZE = 4
-_C.MODEL.SWIN.IN_CHANS = 3
+_C.MODEL.SWIN.IN_CHANS = 1 #SK - Modified form 3 to 1 channel
 _C.MODEL.SWIN.EMBED_DIM = 96
 _C.MODEL.SWIN.DEPTHS = [2, 2, 6, 2]
 _C.MODEL.SWIN.DECODER_DEPTHS = [2, 2, 6, 2]

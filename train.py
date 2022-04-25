@@ -11,30 +11,30 @@ from config import get_config
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--root_path', type=str,
-                    default='../data/Severstal/train_npz', help='root dir for data')
+                    default='../dataset', help='root dir for data')
 parser.add_argument('--dataset', type=str,
                     default='Severstal', help='experiment_name')
 parser.add_argument('--list_dir', type=str,
-                    default='./lists/lists_Severstal', help='list dir')
+                    default='./lists', help='list dir')
 parser.add_argument('--num_classes', type=int,
-                    default=9, help='output channel of network')
-parser.add_argument('--output_dir', type=str, help='output dir')                   
+                    default=5, help='output channel of network')
+parser.add_argument('--output_dir', default='./outputs', type=str, help='output dir')                   
 parser.add_argument('--max_iterations', type=int,
                     default=30000, help='maximum epoch number to train')
 parser.add_argument('--max_epochs', type=int,
-                    default=150, help='maximum epoch number to train')
+                    default=5, help='maximum epoch number to train')
 parser.add_argument('--batch_size', type=int,
-                    default=24, help='batch_size per gpu')
+                    default=6, help='batch_size per gpu')
 parser.add_argument('--n_gpu', type=int, default=1, help='total gpu')
 parser.add_argument('--deterministic', type=int,  default=1,
                     help='whether use deterministic training')
-parser.add_argument('--base_lr', type=float,  default=0.01,
+parser.add_argument('--base_lr', type=float,  default=0.05,
                     help='segmentation network learning rate')
-parser.add_argument('--img_size', type=tuple,
-                    default=(128,800), help='input patch size of network input')
+parser.add_argument('--img_size', type=int,
+                    default=224, help='input patch size of network input')
 parser.add_argument('--seed', type=int,
                     default=1234, help='random seed')
-parser.add_argument('--cfg', type=str, required=True, metavar="FILE", help='path to config file', )
+parser.add_argument('--cfg', type=str, default='configs/swin_tiny_patch4_window7_224_lite.yaml', required=True, metavar="FILE", help='path to config file', )
 parser.add_argument(
         "--opts",
         help="Modify config options by adding 'KEY VALUE' pairs. ",
@@ -57,8 +57,9 @@ parser.add_argument('--eval', action='store_true', help='Perform evaluation only
 parser.add_argument('--throughput', action='store_true', help='Test throughput only')
 
 args = parser.parse_args()
-if args.dataset == "Severstal":
-    args.root_path = os.path.join(args.root_path, "train_npz")
+print("Image Size before Initiation: {}".format(args.img_size))
+# if args.dataset == "Severstal":
+#     args.root_path = os.path.join(args.root_path)
 config = get_config(args)
 
 
@@ -74,13 +75,13 @@ if __name__ == "__main__":
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed(args.seed)
-
+    print("Image Size after Initiation: {}".format(args.img_size))
     dataset_name = args.dataset
     dataset_config = {
         'Severstal': {
             'root_path': args.root_path,
-            'list_dir': './lists/lists_Severstal',
-            'num_classes': 9,
+            'list_dir': './lists',
+            'num_classes': 5,
         },
     }
 
