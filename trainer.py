@@ -15,9 +15,10 @@ from tqdm import tqdm
 from utils import DiceLoss
 from torchvision import transforms
 from utils import test_single_volume
+from datasets.dataset_severstal import Severstal_dataset, RandomGenerator
 
 def trainer_severstal(args, model, snapshot_path):
-    from datasets.dataset_severstal import Severstal_dataset, RandomGenerator
+    
     logging.basicConfig(filename=snapshot_path + "/log.txt", level=logging.INFO,
                         format='[%(asctime)s.%(msecs)03d] %(message)s', datefmt='%H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
