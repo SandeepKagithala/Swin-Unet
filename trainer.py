@@ -15,7 +15,7 @@ from tqdm import tqdm
 from utils import DiceLoss
 from torchvision import transforms
 from utils import test_single_volume
-from datasets.dataset_severstal import Severstal_dataset, RandomGenerator
+from dataset_severstal import Severstal_dataset, RandomGenerator
 
 def trainer_severstal(args, model, snapshot_path):
     
