@@ -4,7 +4,7 @@ from medpy import metric
 from scipy.ndimage import zoom
 import torch.nn as nn
 import SimpleITK as sitk
-
+import os
 
 class DiceLoss(nn.Module):
     def __init__(self, n_classes):
@@ -57,8 +57,39 @@ def calculate_metric_percase(pred, gt):
     else:
         return 0, 0
 
+def test_single_batch(image, label, net, classes, patch_size=[224, 224], test_save_path=None, cases=None):
+    images, labels = image.cpu().detach().numpy(), label.cpu().detach().numpy()
+    predictions = np.zeros_like(labels)
+    for ind in range(images.shape[0]):
+        img = images[ind, :, :]
+        mask = labels[ind, :, :]
+        case_name = cases[ind]
+        x, y = img.shape[0], img.shape[1]
+        if x != patch_size[0] or y != patch_size[1]:
+            img = zoom(img, (patch_size[0] / x, patch_size[1] / y), order=3)  # previous using 0
+        input = torch.from_numpy(img).unsqueeze(0).unsqueeze(0).float().cuda()
+        net.eval()
+        with torch.no_grad():
+            outputs = net(input)
+            out = torch.argmax(torch.softmax(outputs, dim=1), dim=1).squeeze(0)
+            out = out.cpu().detach().numpy()
+            if x != patch_size[0] or y != patch_size[1]:
+                pred = zoom(out, (x / patch_size[0], y / patch_size[1]), order=0)
+            else:
+                pred = out
+            predictions[ind] = pred
 
-def test_single_volume(image, label, net, classes, patch_size=[256, 256], test_save_path=None, case=None, z_spacing=1):
+        if test_save_path is not None:
+            np.savez_compressed(os.path.join(test_save_path, case_name + "_pred.npz"), image = img.astype(np.float32), label = mask, pred = pred)
+    
+    metric_list = []
+    for i in range(1, classes):
+        metric_list.append(calculate_metric_percase(predictions == i, labels == i))
+
+    return metric_list
+
+
+def test_single_volume(image, label, net, classes, patch_size=[224, 224], test_save_path=None, case=None, z_spacing=1):
     image, label = image.squeeze(0).cpu().detach().numpy(), label.squeeze(0).cpu().detach().numpy()
     if len(image.shape) == 3:
         prediction = np.zeros_like(label)

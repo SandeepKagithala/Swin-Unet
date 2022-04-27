@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from utils import DiceLoss
 from torchvision import transforms
-from utils import test_single_volume
+from utils import test_single_batch
 from dataset_severstal import Severstal_dataset, RandomGenerator
 
 def trainer_severstal(args, model, snapshot_path):
@@ -92,7 +92,7 @@ def trainer_severstal(args, model, snapshot_path):
             logging.info("save model to {}".format(save_mode_path))
 
         if epoch_num >= max_epoch - 1:
-            save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num+1) + '.pth')
+            save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '.pth')
             torch.save(model.state_dict(), save_mode_path)
             logging.info("save model to {}".format(save_mode_path))
             iterator.close()
