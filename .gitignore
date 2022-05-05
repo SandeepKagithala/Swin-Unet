@@ -1,3 +1,4 @@
 outputs/
 pretrained_ckpt/
 *.pth
+*.pyc
