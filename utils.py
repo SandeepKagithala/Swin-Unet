@@ -5,6 +5,7 @@ from scipy.ndimage import zoom
 import torch.nn as nn
 import SimpleITK as sitk
 import os
+from torchvision import transforms
 
 class DiceLoss(nn.Module):
     def __init__(self, n_classes):
@@ -42,7 +43,8 @@ class DiceLoss(nn.Module):
             dice = self._dice_loss(inputs[:, i], target[:, i])
             class_wise_dice.append(1.0 - dice.item())
             loss += dice * weight[i]
-        return loss / self.n_classes
+        mean_dice = sum(class_wise_dice) / len(class_wise_dice)
+        return loss / self.n_classes, mean_dice
 
 
 def calculate_metric_percase(pred, gt):
@@ -56,6 +58,24 @@ def calculate_metric_percase(pred, gt):
         return 1, 0
     else:
         return 0, 0
+
+# def test_batch(images, labels, net, classes, patch_size=[224, 224], test_save_path=None, cases=None):
+#     images = transforms.Resize(size=(224,224))(images)
+#     #labels = transforms.Resize(size=(224,224))(labels)
+#     thresholds_max=[0, 0.7,0.7,0.7,0.7]
+#     thresholds_min=[0, 0.2,0.2,0.3,0.3]
+#     min_area=[500, 500, 750, 1000]
+#     net.eval()
+#     with torch.no_grad():
+#         batch_preds = net(images).detach().cpu().numpy()
+    
+#     for pred, fname in zip(batch_preds, cases):
+#         for i in range(1,5):
+#             p_channel = pred[i, :, :]
+#             p_channel_ = p_channel
+#             p_channel = (p_channel>thresholds_max[i]).astype(np.uint8)*i
+
+
 
 def test_single_batch(image, label, net, classes, patch_size=[224, 224], test_save_path=None, cases=None):
     images, labels = image.cpu().detach().numpy(), label.cpu().detach().numpy()
@@ -80,7 +100,7 @@ def test_single_batch(image, label, net, classes, patch_size=[224, 224], test_sa
             predictions[ind] = pred
 
         if test_save_path is not None:
-            np.savez_compressed(os.path.join(test_save_path, case_name + "_pred.npz"), image = img.astype(np.float32), label = mask, pred = pred)
+            np.savez_compressed(os.path.join(test_save_path, case_name + "_pred.npz"), image = images[ind, :, :].astype(np.float32), label = mask, pred = pred)
     
     metric_list = []
     for i in range(1, classes):

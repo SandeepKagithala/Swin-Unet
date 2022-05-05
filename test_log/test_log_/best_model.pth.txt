@@ -1,0 +1,219 @@
+[13:23:26.492] Namespace(Dataset=<class 'dataset_severstal.Severstal_dataset'>, accumulation_steps=None, amp_opt_level='O1', base_lr=0.05, batch_size=24, cache_mode='part', cfg='configs/swin_tiny_patch4_window7_224_lite.yaml', dataset='Severstal', deterministic=1, eval=False, img_size=224, is_pretrain=True, is_save=True, list_dir='./lists', max_epochs=30, max_iterations=50000, num_classes=5, opts=None, output_dir='./outputs', resume=None, seed=1234, tag=None, test_images_dir='../dataset/', test_save_dir='../predictions', throughput=False, use_checkpoint=False, zip=False)
+[13:23:26.492] best_model.pth
+[13:23:26.597] 28 test iterations per epoch
+[13:23:41.482] batch_idx 0 mean_dice 0.450120 mean_hd95 30.554386
+[13:23:51.021] batch_idx 1 mean_dice 0.438794 mean_hd95 93.693707
+[13:24:02.546] batch_idx 2 mean_dice 0.465753 mean_hd95 58.888107
+[13:24:16.295] batch_idx 3 mean_dice 0.440241 mean_hd95 67.277595
+[13:24:26.323] batch_idx 4 mean_dice 0.464680 mean_hd95 46.110820
+[13:24:35.986] batch_idx 5 mean_dice 0.436157 mean_hd95 249.514301
+[13:24:47.687] batch_idx 6 mean_dice 0.545021 mean_hd95 270.787178
+[13:24:59.260] batch_idx 7 mean_dice 0.482160 mean_hd95 146.721672
+[13:25:11.895] batch_idx 8 mean_dice 0.418607 mean_hd95 267.707585
+[13:25:21.558] batch_idx 9 mean_dice 0.648449 mean_hd95 146.546107
+[13:25:32.654] batch_idx 10 mean_dice 0.539485 mean_hd95 177.311585
+[13:25:44.119] batch_idx 11 mean_dice 0.434846 mean_hd95 158.563477
+[13:25:53.642] batch_idx 12 mean_dice 0.500573 mean_hd95 10.362190
+[13:26:03.766] batch_idx 13 mean_dice 0.369301 mean_hd95 50.114253
+[13:26:15.356] batch_idx 14 mean_dice 0.496460 mean_hd95 301.826318
+[13:26:25.990] batch_idx 15 mean_dice 0.754293 mean_hd95 29.109287
+[13:26:36.147] batch_idx 16 mean_dice 0.704288 mean_hd95 18.231249
+[13:26:48.062] batch_idx 17 mean_dice 0.515556 mean_hd95 58.171690
+[13:27:00.573] batch_idx 18 mean_dice 0.654654 mean_hd95 31.752841
+[13:27:13.238] batch_idx 19 mean_dice 0.415865 mean_hd95 88.107752
+[13:27:25.906] batch_idx 20 mean_dice 0.634170 mean_hd95 37.667073
+[13:27:35.630] batch_idx 21 mean_dice 0.434081 mean_hd95 19.622079
+[13:27:47.861] batch_idx 22 mean_dice 0.483801 mean_hd95 173.835763
+[13:27:58.160] batch_idx 23 mean_dice 0.706631 mean_hd95 28.933651
+[13:28:08.538] batch_idx 24 mean_dice 0.715954 mean_hd95 28.591572
+[13:28:19.099] batch_idx 25 mean_dice 0.503912 mean_hd95 9.802950
+[13:28:29.408] batch_idx 26 mean_dice 0.492564 mean_hd95 46.304153
+[13:28:37.079] batch_idx 27 mean_dice 0.456908 mean_hd95 46.369052
+[13:28:37.347] Mean class 1 mean_dice 0.436539 mean_hd95 204.285561
+[13:28:37.347] Mean class 2 mean_dice 0.305039 mean_hd95 111.410621
+[13:28:37.347] Mean class 3 mean_dice 0.666346 mean_hd95 13.843447
+[13:28:37.347] Mean class 4 mean_dice 0.678265 mean_hd95 55.100143
+[13:28:37.347] Testing performance in best val model: mean_dice : 0.521547 mean_hd95 : 96.159943
+[15:58:13.076] Namespace(Dataset=<class 'dataset_severstal.Severstal_dataset'>, accumulation_steps=None, amp_opt_level='O1', base_lr=0.05, batch_size=24, cache_mode='part', cfg='configs/swin_tiny_patch4_window7_224_lite.yaml', dataset='Severstal', deterministic=1, eval=False, img_size=224, is_pretrain=True, is_save=True, list_dir='./lists', max_epochs=30, max_iterations=50000, num_classes=5, opts=None, output_dir='./outputs', resume=None, seed=1234, tag=None, test_images_dir='../dataset/', test_save_dir='../predictions', throughput=False, use_checkpoint=False, zip=False)
+[15:58:13.076] best_model.pth
+[15:58:13.076] 28 test iterations per epoch
+[15:58:28.907] batch_idx 0 mean_dice 0.450120 mean_hd95 30.554386
+[15:58:39.957] batch_idx 1 mean_dice 0.438794 mean_hd95 93.693707
+[15:58:52.817] batch_idx 2 mean_dice 0.465753 mean_hd95 58.888107
+[15:59:06.249] batch_idx 3 mean_dice 0.440241 mean_hd95 67.277595
+[15:59:17.798] batch_idx 4 mean_dice 0.464680 mean_hd95 46.110820
+[15:59:29.538] batch_idx 5 mean_dice 0.436157 mean_hd95 249.514301
+[15:59:43.273] batch_idx 6 mean_dice 0.545021 mean_hd95 270.787178
+[15:59:56.227] batch_idx 7 mean_dice 0.482160 mean_hd95 146.721672
+[16:00:09.579] batch_idx 8 mean_dice 0.418607 mean_hd95 267.707585
+[16:00:20.599] batch_idx 9 mean_dice 0.648449 mean_hd95 146.546107
+[16:00:33.044] batch_idx 10 mean_dice 0.539485 mean_hd95 177.311585
+[16:00:46.048] batch_idx 11 mean_dice 0.434846 mean_hd95 158.563477
+[16:00:57.008] batch_idx 12 mean_dice 0.500573 mean_hd95 10.362190
+[16:01:08.450] batch_idx 13 mean_dice 0.369301 mean_hd95 50.114253
+[16:01:21.497] batch_idx 14 mean_dice 0.496460 mean_hd95 301.826318
+[16:01:33.475] batch_idx 15 mean_dice 0.754293 mean_hd95 29.109287
+[16:01:45.518] batch_idx 16 mean_dice 0.704288 mean_hd95 18.231249
+[16:01:58.820] batch_idx 17 mean_dice 0.515556 mean_hd95 58.171690
+[16:02:12.848] batch_idx 18 mean_dice 0.654654 mean_hd95 31.752841
+[16:02:26.631] batch_idx 19 mean_dice 0.415865 mean_hd95 88.107752
+[16:02:40.265] batch_idx 20 mean_dice 0.634170 mean_hd95 37.667073
+[16:02:51.540] batch_idx 21 mean_dice 0.434081 mean_hd95 19.622079
+[16:03:05.521] batch_idx 22 mean_dice 0.483801 mean_hd95 173.835763
+[16:03:16.822] batch_idx 23 mean_dice 0.706631 mean_hd95 28.933651
+[16:03:28.516] batch_idx 24 mean_dice 0.715954 mean_hd95 28.591572
+[16:03:40.065] batch_idx 25 mean_dice 0.503912 mean_hd95 9.802950
+[16:03:55.124] batch_idx 26 mean_dice 0.492564 mean_hd95 46.304153
+[16:04:05.920] batch_idx 27 mean_dice 0.456908 mean_hd95 46.369052
+[16:04:06.220] Mean class 1 mean_dice 0.436539 mean_hd95 204.285561
+[16:04:06.220] Mean class 2 mean_dice 0.305039 mean_hd95 111.410621
+[16:04:06.220] Mean class 3 mean_dice 0.666346 mean_hd95 13.843447
+[16:04:06.220] Mean class 4 mean_dice 0.678265 mean_hd95 55.100143
+[16:04:06.221] Testing performance in best val model: mean_dice : 0.521547 mean_hd95 : 96.159943
+[08:49:14.288] Namespace(Dataset=<class 'dataset_severstal.Severstal_dataset'>, accumulation_steps=None, amp_opt_level='O1', base_lr=0.05, batch_size=12, cache_mode='part', cfg='configs/swin_tiny_patch4_window7_224_lite.yaml', dataset='Severstal', deterministic=1, eval=False, img_size=224, is_pretrain=True, is_save=True, list_dir='./lists', max_epochs=100, max_iterations=50000, num_classes=5, opts=None, output_dir='./outputs', resume=None, seed=1234, tag=None, test_images_dir='../dataset/', test_save_dir='../predictions', throughput=False, use_checkpoint=False, zip=False)
+[08:49:14.321] best_model.pth
+[08:49:14.331] 28 test iterations per epoch
+[08:49:32.965] batch_idx 0 mean_dice 0.486447 mean_hd95 30.390240
+[08:49:44.387] batch_idx 1 mean_dice 0.445096 mean_hd95 27.233353
+[08:49:57.371] batch_idx 2 mean_dice 0.456453 mean_hd95 91.920873
+[08:50:10.682] batch_idx 3 mean_dice 0.426657 mean_hd95 54.509728
+[08:50:22.386] batch_idx 4 mean_dice 0.514332 mean_hd95 121.647723
+[08:50:34.069] batch_idx 5 mean_dice 0.472971 mean_hd95 25.961509
+[08:50:48.499] batch_idx 6 mean_dice 0.575539 mean_hd95 277.022350
+[08:51:01.628] batch_idx 7 mean_dice 0.523876 mean_hd95 102.931410
+[08:51:15.682] batch_idx 8 mean_dice 0.481181 mean_hd95 231.415875
+[08:51:26.856] batch_idx 9 mean_dice 0.650735 mean_hd95 105.896041
+[08:51:39.624] batch_idx 10 mean_dice 0.571673 mean_hd95 170.890937
+[08:51:53.632] batch_idx 11 mean_dice 0.476729 mean_hd95 188.766456
+[08:52:05.210] batch_idx 12 mean_dice 0.476909 mean_hd95 124.181968
+[08:52:17.091] batch_idx 13 mean_dice 0.367962 mean_hd95 73.123070
+[08:52:30.092] batch_idx 14 mean_dice 0.578445 mean_hd95 40.545102
+[08:52:41.966] batch_idx 15 mean_dice 0.493583 mean_hd95 31.606275
+[08:52:54.227] batch_idx 16 mean_dice 0.731694 mean_hd95 20.380460
+[08:53:07.519] batch_idx 17 mean_dice 0.569371 mean_hd95 23.451319
+[08:53:21.772] batch_idx 18 mean_dice 0.631924 mean_hd95 33.041924
+[08:53:35.848] batch_idx 19 mean_dice 0.379067 mean_hd95 60.214862
+[08:53:51.385] batch_idx 20 mean_dice 0.645377 mean_hd95 60.212370
+[08:54:03.449] batch_idx 21 mean_dice 0.431371 mean_hd95 22.054810
+[08:54:17.648] batch_idx 22 mean_dice 0.568046 mean_hd95 211.066708
+[08:54:28.848] batch_idx 23 mean_dice 0.729187 mean_hd95 30.384190
+[08:54:40.668] batch_idx 24 mean_dice 0.707027 mean_hd95 23.940914
+[08:54:52.344] batch_idx 25 mean_dice 0.487343 mean_hd95 10.641610
+[08:55:04.070] batch_idx 26 mean_dice 0.764545 mean_hd95 42.745669
+[08:55:12.792] batch_idx 27 mean_dice 0.723395 mean_hd95 47.852861
+[08:55:13.061] Mean class 1 mean_dice 0.447441 mean_hd95 166.562924
+[08:55:13.061] Mean class 2 mean_dice 0.361669 mean_hd95 80.654313
+[08:55:13.061] Mean class 3 mean_dice 0.696423 mean_hd95 12.719157
+[08:55:13.061] Mean class 4 mean_dice 0.689743 mean_hd95 66.353693
+[08:55:13.062] Testing performance in best val model: mean_dice : 0.548819 mean_hd95 : 81.572522
+[11:22:10.001] Namespace(Dataset=<class 'dataset_severstal.Severstal_dataset'>, accumulation_steps=None, amp_opt_level='O1', base_lr=0.05, batch_size=12, cache_mode='part', cfg='configs/swin_tiny_patch4_window7_224_lite.yaml', dataset='Severstal', deterministic=1, eval=False, img_size=224, is_pretrain=True, is_save=True, list_dir='./lists', max_epochs=30, max_iterations=50000, num_classes=5, opts=None, output_dir='./outputs', resume=None, seed=1234, tag=None, test_images_dir='../dataset_new/', test_save_dir='../predictions', throughput=False, use_checkpoint=False, zip=False)
+[11:22:10.001] best_model.pth
+[11:22:10.002] 3 test iterations per epoch
+[11:22:16.844] batch_idx 0 mean_dice 0.201380 mean_hd95 106.774814
+[11:22:19.509] batch_idx 1 mean_dice 0.195633 mean_hd95 49.373743
+[11:22:19.654] batch_idx 2 mean_dice 0.159894 mean_hd95 8.003905
+[11:22:19.903] Mean class 1 mean_dice 0.007023 mean_hd95 73.944498
+[11:22:19.903] Mean class 2 mean_dice 0.000000 mean_hd95 99.430911
+[11:22:19.903] Mean class 3 mean_dice 0.403186 mean_hd95 27.739369
+[11:22:19.904] Mean class 4 mean_dice 0.332335 mean_hd95 17.755172
+[11:22:19.904] Testing performance in best val model: mean_dice : 0.185636 mean_hd95 : 54.717487
+[13:44:01.643] Namespace(Dataset=<class 'dataset_severstal.Severstal_dataset'>, accumulation_steps=None, amp_opt_level='O1', base_lr=0.05, batch_size=12, cache_mode='part', cfg='configs/swin_tiny_patch4_window7_224_lite.yaml', dataset='Severstal', deterministic=1, eval=False, img_size=224, is_pretrain=True, is_save=True, list_dir='./lists', max_epochs=30, max_iterations=50000, num_classes=5, opts=None, output_dir='./outputs', resume=None, seed=1234, tag=None, test_images_dir='../dataset_new/', test_save_dir='../predictions', throughput=False, use_checkpoint=False, zip=False)
+[13:44:01.644] best_model.pth
+[13:44:01.650] 42 test iterations per epoch
+[13:44:08.822] batch_idx 0 mean_dice 0.692415 mean_hd95 16.345392
+[13:44:11.964] batch_idx 1 mean_dice 0.677432 mean_hd95 26.655385
+[13:44:15.092] batch_idx 2 mean_dice 0.703793 mean_hd95 24.791031
+[13:44:18.176] batch_idx 3 mean_dice 0.728814 mean_hd95 28.971378
+[13:44:21.366] batch_idx 4 mean_dice 0.678712 mean_hd95 25.554395
+[13:44:24.383] batch_idx 5 mean_dice 0.778689 mean_hd95 14.324976
+[13:44:27.565] batch_idx 6 mean_dice 0.669954 mean_hd95 30.312212
+[13:44:30.799] batch_idx 7 mean_dice 0.727499 mean_hd95 21.207278
+[13:44:33.876] batch_idx 8 mean_dice 0.593799 mean_hd95 51.528771
+[13:44:37.133] batch_idx 9 mean_dice 0.505727 mean_hd95 46.556626
+[13:44:40.217] batch_idx 10 mean_dice 0.689022 mean_hd95 65.510774
+[13:44:43.389] batch_idx 11 mean_dice 0.650261 mean_hd95 24.836969
+[13:44:46.686] batch_idx 12 mean_dice 0.693788 mean_hd95 67.596389
+[13:44:49.770] batch_idx 13 mean_dice 0.608543 mean_hd95 36.909376
+[13:44:53.048] batch_idx 14 mean_dice 0.587711 mean_hd95 48.298982
+[13:44:56.134] batch_idx 15 mean_dice 0.546602 mean_hd95 59.534765
+[13:44:59.410] batch_idx 16 mean_dice 0.725126 mean_hd95 19.553874
+[13:45:02.611] batch_idx 17 mean_dice 0.666664 mean_hd95 37.969311
+[13:45:05.778] batch_idx 18 mean_dice 0.655690 mean_hd95 34.267608
+[13:45:08.993] batch_idx 19 mean_dice 0.708107 mean_hd95 20.597634
+[13:45:12.455] batch_idx 20 mean_dice 0.707694 mean_hd95 12.152778
+[13:45:15.701] batch_idx 21 mean_dice 0.768163 mean_hd95 10.276912
+[13:45:18.947] batch_idx 22 mean_dice 0.691950 mean_hd95 19.333698
+[13:45:22.183] batch_idx 23 mean_dice 0.711938 mean_hd95 16.003734
+[13:45:25.637] batch_idx 24 mean_dice 0.635566 mean_hd95 30.700870
+[13:45:28.720] batch_idx 25 mean_dice 0.670864 mean_hd95 17.286250
+[13:45:32.032] batch_idx 26 mean_dice 0.674763 mean_hd95 21.114651
+[13:45:35.380] batch_idx 27 mean_dice 0.772792 mean_hd95 22.695054
+[13:45:38.466] batch_idx 28 mean_dice 0.664481 mean_hd95 25.766112
+[13:45:41.794] batch_idx 29 mean_dice 0.760323 mean_hd95 42.172129
+[13:45:44.988] batch_idx 30 mean_dice 0.700766 mean_hd95 20.351096
+[13:45:48.308] batch_idx 31 mean_dice 0.655878 mean_hd95 20.011164
+[13:45:51.713] batch_idx 32 mean_dice 0.674826 mean_hd95 16.915720
+[13:45:54.831] batch_idx 33 mean_dice 0.667416 mean_hd95 19.750000
+[13:45:57.949] batch_idx 34 mean_dice 0.556936 mean_hd95 42.691456
+[13:46:01.198] batch_idx 35 mean_dice 0.767521 mean_hd95 8.735749
+[13:46:04.393] batch_idx 36 mean_dice 0.636917 mean_hd95 43.358610
+[13:46:07.632] batch_idx 37 mean_dice 0.682646 mean_hd95 19.477129
+[13:46:10.809] batch_idx 38 mean_dice 0.586616 mean_hd95 24.114343
+[13:46:14.119] batch_idx 39 mean_dice 0.708912 mean_hd95 15.471549
+[13:46:17.360] batch_idx 40 mean_dice 0.808182 mean_hd95 9.876878
+[13:46:19.397] batch_idx 41 mean_dice 0.703772 mean_hd95 9.435261
+[13:46:19.645] Mean class 1 mean_dice 0.607724 mean_hd95 39.125276
+[13:46:19.645] Mean class 2 mean_dice 0.732558 mean_hd95 14.199396
+[13:46:19.646] Mean class 3 mean_dice 0.628781 mean_hd95 40.313390
+[13:46:19.646] Mean class 4 mean_dice 0.744963 mean_hd95 17.696630
+[13:46:19.647] Testing performance in best val model: mean_dice : 0.678506 mean_hd95 : 27.833673
+[16:56:09.390] Namespace(Dataset=<class 'dataset_severstal.Severstal_dataset'>, accumulation_steps=None, amp_opt_level='O1', base_lr=0.05, batch_size=12, cache_mode='part', cfg='configs/swin_tiny_patch4_window7_224_lite.yaml', dataset='Severstal', deterministic=1, eval=False, img_size=224, is_pretrain=True, is_save=True, list_dir='./lists', max_epochs=50, max_iterations=50000, num_classes=5, opts=None, output_dir='./outputs', resume=None, seed=1234, tag=None, test_images_dir='../dataset_new/', test_save_dir='../predictions', throughput=False, use_checkpoint=False, zip=False)
+[16:56:09.492] best_model.pth
+[16:56:09.500] 42 test iterations per epoch
+[16:56:16.911] batch_idx 0 mean_dice 0.727222 mean_hd95 12.942197
+[16:56:20.584] batch_idx 1 mean_dice 0.727601 mean_hd95 25.823092
+[16:56:23.993] batch_idx 2 mean_dice 0.751748 mean_hd95 10.885115
+[16:56:27.777] batch_idx 3 mean_dice 0.731459 mean_hd95 24.549953
+[16:56:31.386] batch_idx 4 mean_dice 0.669244 mean_hd95 54.325635
+[16:56:34.829] batch_idx 5 mean_dice 0.807645 mean_hd95 12.413115
+[16:56:38.628] batch_idx 6 mean_dice 0.677479 mean_hd95 30.652909
+[16:56:42.289] batch_idx 7 mean_dice 0.716604 mean_hd95 23.167553
+[16:56:46.195] batch_idx 8 mean_dice 0.613987 mean_hd95 49.477205
+[16:56:50.199] batch_idx 9 mean_dice 0.499146 mean_hd95 54.457967
+[16:56:53.771] batch_idx 10 mean_dice 0.714798 mean_hd95 58.721092
+[16:56:57.366] batch_idx 11 mean_dice 0.653815 mean_hd95 27.600649
+[16:57:01.066] batch_idx 12 mean_dice 0.694003 mean_hd95 60.252521
+[16:57:04.704] batch_idx 13 mean_dice 0.600599 mean_hd95 43.662992
+[16:57:08.570] batch_idx 14 mean_dice 0.645033 mean_hd95 48.517202
+[16:57:12.226] batch_idx 15 mean_dice 0.610508 mean_hd95 60.695346
+[16:57:15.948] batch_idx 16 mean_dice 0.621286 mean_hd95 32.501013
+[16:57:19.636] batch_idx 17 mean_dice 0.691907 mean_hd95 38.302024
+[16:57:23.279] batch_idx 18 mean_dice 0.707501 mean_hd95 32.290527
+[16:57:26.816] batch_idx 19 mean_dice 0.758193 mean_hd95 13.788279
+[16:57:30.418] batch_idx 20 mean_dice 0.781814 mean_hd95 10.307315
+[16:57:33.920] batch_idx 21 mean_dice 0.759486 mean_hd95 12.295325
+[16:57:37.361] batch_idx 22 mean_dice 0.729990 mean_hd95 15.573801
+[16:57:40.756] batch_idx 23 mean_dice 0.736077 mean_hd95 15.451641
+[16:57:44.215] batch_idx 24 mean_dice 0.682674 mean_hd95 24.752435
+[16:57:47.382] batch_idx 25 mean_dice 0.600653 mean_hd95 40.181945
+[16:57:51.005] batch_idx 26 mean_dice 0.716915 mean_hd95 22.486378
+[16:57:54.644] batch_idx 27 mean_dice 0.796085 mean_hd95 7.167130
+[16:57:57.962] batch_idx 28 mean_dice 0.694066 mean_hd95 25.608753
+[16:58:01.498] batch_idx 29 mean_dice 0.776934 mean_hd95 41.859584
+[16:58:05.266] batch_idx 30 mean_dice 0.741836 mean_hd95 13.747649
+[16:58:08.762] batch_idx 31 mean_dice 0.679975 mean_hd95 17.546881
+[16:58:13.386] batch_idx 32 mean_dice 0.692661 mean_hd95 20.489591
+[16:58:17.268] batch_idx 33 mean_dice 0.692439 mean_hd95 18.411809
+[16:58:20.662] batch_idx 34 mean_dice 0.630576 mean_hd95 28.966942
+[16:58:24.313] batch_idx 35 mean_dice 0.790112 mean_hd95 7.637414
+[16:58:27.801] batch_idx 36 mean_dice 0.703070 mean_hd95 34.013876
+[16:58:31.332] batch_idx 37 mean_dice 0.726037 mean_hd95 11.409186
+[16:58:35.388] batch_idx 38 mean_dice 0.633316 mean_hd95 19.548541
+[16:58:39.298] batch_idx 39 mean_dice 0.733351 mean_hd95 13.706361
+[16:58:43.738] batch_idx 40 mean_dice 0.835892 mean_hd95 6.879898
+[16:58:45.871] batch_idx 41 mean_dice 0.720374 mean_hd95 12.043501
+[16:58:46.139] Mean class 1 mean_dice 0.638889 mean_hd95 37.709401
+[16:58:46.139] Mean class 2 mean_dice 0.771860 mean_hd95 13.695087
+[16:58:46.140] Mean class 3 mean_dice 0.642117 mean_hd95 40.051028
+[16:58:46.140] Mean class 4 mean_dice 0.754191 mean_hd95 16.650421
+[16:58:46.141] Testing performance in best val model: mean_dice : 0.701764 mean_hd95 : 27.026484

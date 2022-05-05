@@ -20,7 +20,7 @@ parser.add_argument('--num_classes', type=int,
                     default=5, help='output channel of network')
 parser.add_argument('--output_dir', default='./outputs', type=str, help='output dir')                   
 parser.add_argument('--max_iterations', type=int,
-                    default=30000, help='maximum epoch number to train')
+                    default=70000, help='maximum epoch number to train')
 parser.add_argument('--max_epochs', type=int,
                     default=5, help='maximum epoch number to train')
 parser.add_argument('--batch_size', type=int,
@@ -57,7 +57,7 @@ parser.add_argument('--eval', action='store_true', help='Perform evaluation only
 parser.add_argument('--throughput', action='store_true', help='Test throughput only')
 
 args = parser.parse_args()
-print("Image Size before Initiation: {}".format(args.img_size))
+# print("Image Size before Initiation: {}".format(args.img_size))
 # if args.dataset == "Severstal":
 #     args.root_path = os.path.join(args.root_path)
 config = get_config(args)
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed(args.seed)
-    print("Image Size after Initiation: {}".format(args.img_size))
+    # print("Image Size after Initiation: {}".format(args.img_size))
     dataset_name = args.dataset
     dataset_config = {
         'Severstal': {
@@ -94,7 +94,13 @@ if __name__ == "__main__":
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
     net = ViT_seg(config, img_size=args.img_size, num_classes=args.num_classes).cuda()
-    net.load_from(config)
+    
+    pretrained_path = config.MODEL.PRETRAIN_CKPT
+    if 'best_model' in pretrained_path:
+        msg = net.load_state_dict(torch.load(pretrained_path))
+        print("Using Self Trained swin unet : ",msg)
+    else:
+        net.load_from(config)
 
     trainer = {'Severstal': trainer_severstal,}
     trainer[dataset_name](args, net, args.output_dir)

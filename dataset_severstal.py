@@ -88,7 +88,7 @@ class Severstal_dataset(Dataset):
         self.split = split
         self.sample_list = open(os.path.join(list_dir, self.split+'.txt')).readlines()
         self.data_dir = base_dir
-        self.maskGenerator = MaskGenerator(os.path.join(list_dir, 'mask_data.csv'))
+        #self.maskGenerator = MaskGenerator(os.path.join(list_dir, 'mask_data.csv'))
 
     def __len__(self):
         return len(self.sample_list)
@@ -103,7 +103,7 @@ class Severstal_dataset(Dataset):
         #     img = (img - np.min(img))/(np.max(img) - np.min(img))
         #     mask = self.maskGenerator.build_mask(fileName)
         # else:
-        data_path = os.path.join(self.data_dir, slice_name+'.npz')
+        data_path = os.path.join(self.data_dir, self.split, slice_name+'.npz')
         data = np.load(data_path)
         img, mask = data['image'], data['label']
 

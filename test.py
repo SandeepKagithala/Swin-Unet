@@ -9,7 +9,7 @@ import torch.backends.cudnn as cudnn
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from datasets.dataset_severstal import Severstal_dataset
+from dataset_severstal import Severstal_dataset
 from utils import test_single_batch
 from networks.vision_transformer import SwinUnet as ViT_seg
 from trainer import trainer_severstal
@@ -58,8 +58,8 @@ parser.add_argument('--eval', action='store_true', help='Perform evaluation only
 parser.add_argument('--throughput', action='store_true', help='Test throughput only')
 
 args = parser.parse_args()
-if args.dataset == "Severstal":
-    args.test_images_dir = os.path.join(args.test_images_dir, "test_vol_h5")
+# if args.dataset == "Severstal":
+#     args.test_images_dir = os.path.join(args.test_images_dir, "test_vol_h5")
 config = get_config(args)
 
 
@@ -70,13 +70,13 @@ def inference(args, model, test_save_path=None):
     model.eval()
     metric_list = 0.0
     for i_batch, sampled_batch in tqdm(enumerate(testloader)):
-        h, w = sampled_batch["image"].size()[2:]
+        h, w = sampled_batch["image"].size()[1:]
         image, label, case_names = sampled_batch["image"], sampled_batch["label"], sampled_batch['case_name']
         metric_i = test_single_batch(image, label, model, classes=args.num_classes, patch_size=[args.img_size, args.img_size],
                                       test_save_path=test_save_path, cases=case_names)
         metric_list += np.array(metric_i)
         logging.info('batch_idx %d mean_dice %f mean_hd95 %f' % (i_batch, np.mean(metric_i, axis=0)[0], np.mean(metric_i, axis=0)[1]))
-    metric_list = metric_list / len(db_test)
+    metric_list = metric_list / len(testloader)
     for i in range(1, args.num_classes):
         logging.info('Mean class %d mean_dice %f mean_hd95 %f' % (i, metric_list[i-1][0], metric_list[i-1][1]))
     performance = np.mean(metric_list, axis=0)[0]
@@ -119,11 +119,11 @@ if __name__ == "__main__":
     if not os.path.exists(snapshot): snapshot = snapshot.replace('best_model', 'epoch_'+str(args.max_epochs-1))
     msg = net.load_state_dict(torch.load(snapshot))
     print("self trained swin unet",msg)
-    snapshot_name = snapshot.split('/')[-1]
+    snapshot_name = os.path.basename(snapshot)
 
     log_folder = './test_log/test_log_'
     os.makedirs(log_folder, exist_ok=True)
-    logging.basicConfig(filename=log_folder + '/'+snapshot_name+".txt", level=logging.INFO, format='[%(asctime)s.%(msecs)03d] %(message)s', datefmt='%H:%M:%S')
+    logging.basicConfig(filename=os.path.join(log_folder, snapshot_name+".txt"), level=logging.INFO, format='[%(asctime)s.%(msecs)03d] %(message)s', datefmt='%H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
     logging.info(str(args))
     logging.info(snapshot_name)
