@@ -65,6 +65,9 @@ def trainer_severstal(args, model, snapshot_path):
     for epoch_num in iterator:
         # Model Training
         model.train()
+        train_loss_sum = 0
+        train_loss_ce_sum = 0
+        train_mean_dice_sum = 0
         for i_batch, sampled_batch in enumerate(trainloader):
             image_batch, label_batch = sampled_batch['image'], sampled_batch['label']
             image_batch, label_batch = image_batch.cuda(), label_batch.cuda()
@@ -86,7 +89,10 @@ def trainer_severstal(args, model, snapshot_path):
             writer.add_scalar('info/loss_ce', loss_ce, iter_num)
             writer.add_scalar('info/train_mean_dice', mean_dice, iter_num)
 
-            logging.info('iteration %d : loss : %f, loss_ce: %f, mean_dice: %f' % (iter_num, loss.item(), loss_ce.item(), mean_dice))
+            train_loss_sum += loss
+            train_loss_ce_sum += loss_ce
+            train_mean_dice_sum += mean_dice
+            #logging.info('iteration %d : loss : %f, loss_ce: %f, mean_dice: %f' % (iter_num, loss.item(), loss_ce.item(), mean_dice))
 
             if iter_num % 20 == 0:
                 image = image_batch[1, 0:1, :, :]
@@ -96,6 +102,15 @@ def trainer_severstal(args, model, snapshot_path):
                 writer.add_image('train/Prediction', outputs[1, ...] * 50, iter_num)
                 labs = label_batch[1, ...].unsqueeze(0) * 50
                 writer.add_image('train/GroundTruth', labs, iter_num)
+
+        avg_train_loss = train_loss_sum / len(trainloader)
+        avg_train_loss_ce = train_loss_ce_sum / len(trainloader)
+        avg_train_mean_dice = train_mean_dice_sum / len(trainloader)
+
+        writer.add_scalar('info/train_total_loss', avg_train_loss, epoch_num)
+        writer.add_scalar('info/train_loss_ce', avg_train_loss_ce, epoch_num)
+        writer.add_scalar('info/train_mean_dice', avg_train_mean_dice, epoch_num)
+        logging.info("Average Training Loss: {}, Average Mean Dice Score: {}".format(avg_loss, avg_mean_dice))
 
         #Validation Testing
         model.eval()
