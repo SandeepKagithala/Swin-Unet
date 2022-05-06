@@ -116,9 +116,9 @@ class Severstal_dataset(Dataset):
         slice_name = self.sample_list[idx].strip('\n')
         if 'train_images' in self.data_dir:
             fileName = slice_name + '.jpg'
-            print(fileName)
             img = cv2.imread(os.path.join(self.data_dir, fileName))
             mask = self.maskGenerator.build_mask(fileName)
+            print(type(img), isinstance(img, np.ndarray))
         else:
             data_path = os.path.join(self.data_dir, self.split, slice_name+'.npz')
             data = np.load(data_path)
