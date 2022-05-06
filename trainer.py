@@ -41,8 +41,8 @@ def trainer_severstal(args, model, snapshot_path):
         random.seed(args.seed + worker_id)
 
     #trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=8, worker_init_fn=worker_init_fn)
-    trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers = 8)
-    valloader = DataLoader(db_val, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers = 8)
+    trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers = 2)
+    valloader = DataLoader(db_val, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers = 2)
 
     if args.n_gpu > 1:
         model = nn.DataParallel(model)
