@@ -8,6 +8,9 @@ from scipy.ndimage.interpolation import zoom
 from torch.utils.data import Dataset
 import pandas as pd
 import cv2
+import albumentations as A
+from albumentations.pytorch.transforms import ToTensorV2
+import torchvision.transforms as T
 
 
 def random_rot_flip(image, label):
@@ -45,7 +48,7 @@ class MaskGenerator:
             for index, start in enumerate(starts):
                 begin = int(start - 1)
                 end = int(begin + lengths[index])
-                mask[begin : end] = class_id
+                mask[begin : end] = 1 #class_id
             
         rle_mask = mask.reshape(width, height).T
         return rle_mask 
@@ -57,8 +60,8 @@ class MaskGenerator:
         for _,val in sub_df.iterrows():
             masks[:, :, val['ClassId']-1] = self.rle2mask(val['EncodedPixels'], mask_shape, val['ClassId'])
         
-        mask = np.max(masks, axis=-1)
-        return mask
+        # mask = np.max(masks, axis=-1)
+        return masks
 
 
 class RandomGenerator(object):
@@ -83,32 +86,51 @@ class RandomGenerator(object):
 
 
 class Severstal_dataset(Dataset):
-    def __init__(self, base_dir, list_dir, split, transform=None):
-        self.transform = transform  # using transform in torch!
+    def __init__(self, base_dir, list_dir, split, output_size=(224,224)):
         self.split = split
         self.sample_list = open(os.path.join(list_dir, self.split+'.txt')).readlines()
         self.data_dir = base_dir
-        #self.maskGenerator = MaskGenerator(os.path.join(list_dir, 'mask_data.csv'))
+        self.output_size = output_size
+        self.maskGenerator = MaskGenerator(os.path.join(list_dir, 'mask_data.csv'))
+
+        self.img_transform = T.Compose([
+            T.ToTensor(),
+            T.Normalize(mean = (0.485, 0.456, 0.406), std = (0.229, 0.224, 0.225)),
+            T.Resize(size=output_size)
+        ])
+        self.gt_transform = T.Compose([T.ToTensor(), T.Resize(size=output_size)])
+        
+        self.rand_transform = A.Compose(
+            [
+                A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2),
+                A.HorizontalFlip(),
+                A.VerticalFlip(),
+                A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=20),
+            ]
+        )
 
     def __len__(self):
         return len(self.sample_list)
 
     def __getitem__(self, idx):
-        # if self.split == "train":
         slice_name = self.sample_list[idx].strip('\n')
-        # if 'train_images' in self.data_dir:
-        #     fileName = slice_name + '.jpg'
-        #     img = cv2.imread(os.path.join(self.data_dir, fileName))
-        #     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        #     img = (img - np.min(img))/(np.max(img) - np.min(img))
-        #     mask = self.maskGenerator.build_mask(fileName)
-        # else:
-        data_path = os.path.join(self.data_dir, self.split, slice_name+'.npz')
-        data = np.load(data_path)
-        img, mask = data['image'], data['label']
+        if 'train_images' in self.data_dir:
+            fileName = slice_name + '.jpg'
+            img = cv2.imread(os.path.join(self.data_dir, fileName))
+            mask = self.maskGenerator.build_mask(fileName)
+        else:
+            data_path = os.path.join(self.data_dir, self.split, slice_name+'.npz')
+            data = np.load(data_path)
+            img, mask = data['image'], data['label']
 
-        sample = {'image': img, 'label': mask}
-        if self.transform:
-            sample = self.transform(sample)
-        sample['case_name'] = self.sample_list[idx].strip('\n')
+        if self.split == 'train':
+            transformed = self.rand_transform(image=img, mask=mask)
+            image = self.img_transform(transformed['image'])
+            label = self.gt_transform(transformed['mask'])
+        else:
+            image = self.img_transform(img)
+            label = self.gt_transform(mask)
+
+        sample = {'image': image, 'label': label, 'case_name' :  self.sample_list[idx].strip('\n')}
+        
         return sample

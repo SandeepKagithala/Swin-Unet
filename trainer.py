@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from tensorboardX import SummaryWriter
-from torch.nn.modules.loss import CrossEntropyLoss
+from torch.nn.modules.loss import CrossEntropyLoss, BCEWithLogitsLoss
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from utils import DiceLoss
@@ -31,13 +31,8 @@ def trainer_severstal(args, model, snapshot_path):
     num_classes = args.num_classes
     batch_size = args.batch_size * args.n_gpu
     # max_iterations = args.max_iterations
-    db_train = Severstal_dataset(base_dir=args.root_path, list_dir=args.list_dir, split="train",
-                               transform=transforms.Compose(
-                                   [RandomGenerator(output_size=[args.img_size, args.img_size])]))
-    
-    db_val = Severstal_dataset(base_dir=args.root_path, list_dir=args.list_dir, split="val",
-                               transform=transforms.Compose(
-                                   [RandomGenerator(output_size=[args.img_size, args.img_size])]))
+    db_train = Severstal_dataset(base_dir=args.root_path, list_dir=args.list_dir, split="train", output_size=(args.img_size, args.img_size))
+    db_val = Severstal_dataset(base_dir=args.root_path, list_dir=args.list_dir, split="val", output_size=(args.img_size, args.img_size))
 
     print("The length of train set is: {}".format(len(db_train)))
     print("The length of validation set is: {}".format(len(db_val)))
@@ -52,6 +47,7 @@ def trainer_severstal(args, model, snapshot_path):
     if args.n_gpu > 1:
         model = nn.DataParallel(model)
     ce_loss = CrossEntropyLoss()
+    bce_loss = BCEWithLogitsLoss()
     dice_loss = DiceLoss(num_classes)
     optimizer = optim.SGD(model.parameters(), lr=base_lr, momentum=0.9, weight_decay=0.0001)
     writer = SummaryWriter(snapshot_path + '/log/' + datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
@@ -60,7 +56,7 @@ def trainer_severstal(args, model, snapshot_path):
     max_iterations = args.max_epochs * len(trainloader)  # max_epoch = max_iterations // len(trainloader) + 1
     logging.info("{} iterations per epoch. {} max iterations ".format(len(trainloader), max_iterations))
     best_mean_dice = 0
-    weights=[1, 1.2, 1, 1.2, 1]
+    weights=[1.5, 1.5, 1, 1]
     iterator = tqdm(range(max_epoch), ncols=70)
     for epoch_num in iterator:
         # Model Training
@@ -73,8 +69,9 @@ def trainer_severstal(args, model, snapshot_path):
             image_batch, label_batch = image_batch.cuda(), label_batch.cuda()
             with torch.set_grad_enabled(True):
                 outputs = model(image_batch)
-                loss_ce = ce_loss(outputs, label_batch[:].long())
-                loss_dice, mean_dice = dice_loss(outputs, label_batch, softmax=True)
+                loss_ce = bce_loss(outputs, label_batch)
+                # loss_ce = ce_loss(outputs, label_batch[:].long())
+                loss_dice, mean_dice = dice_loss(outputs, label_batch, weight=weights, softmax=False)
                 loss = 0.4 * loss_ce + 0.6 * loss_dice
                 optimizer.zero_grad()
                 loss.backward()
@@ -92,15 +89,16 @@ def trainer_severstal(args, model, snapshot_path):
             train_loss_sum += loss
             train_loss_ce_sum += loss_ce
             train_mean_dice_sum += mean_dice
-            #logging.info('iteration %d : loss : %f, loss_ce: %f, mean_dice: %f' % (iter_num, loss.item(), loss_ce.item(), mean_dice))
+            logging.info('iteration %d : loss : %f, loss_ce: %f, mean_dice: %f' % (iter_num, loss.item(), loss_ce.item(), mean_dice))
 
             if iter_num % 20 == 0:
                 image = image_batch[1, 0:1, :, :]
                 image = (image - image.min()) / (image.max() - image.min())
                 writer.add_image('train/Image', image, iter_num)
-                outputs = torch.argmax(torch.softmax(outputs, dim=1), dim=1, keepdim=True)
+                # outputs = torch.argmax(torch.softmax(outputs, dim=1), dim=1, keepdim=True)
+                outputs = torch.sigmoid(outputs)
                 writer.add_image('train/Prediction', outputs[1, ...] * 50, iter_num)
-                labs = label_batch[1, ...].unsqueeze(0) * 50
+                labs = label_batch[1, ...] * 50
                 writer.add_image('train/GroundTruth', labs, iter_num)
 
         avg_train_loss = train_loss_sum / len(trainloader)
@@ -110,7 +108,7 @@ def trainer_severstal(args, model, snapshot_path):
         writer.add_scalar('info/train_total_loss', avg_train_loss, epoch_num)
         writer.add_scalar('info/train_loss_ce', avg_train_loss_ce, epoch_num)
         writer.add_scalar('info/train_mean_dice', avg_train_mean_dice, epoch_num)
-        logging.info("Average Training Loss: {}, Average Mean Dice Score: {}".format(avg_loss, avg_mean_dice))
+        logging.info("Average Training Loss: {}, Average Mean Dice Score: {}".format(avg_train_loss, avg_train_mean_dice))
 
         #Validation Testing
         model.eval()
@@ -123,8 +121,9 @@ def trainer_severstal(args, model, snapshot_path):
 
             with torch.no_grad():
                 outputs = model(image_batch)
-                loss_ce = ce_loss(outputs, label_batch[:].long())
-                loss_dice, mean_dice = dice_loss(outputs, label_batch, softmax=True)
+                loss_ce = bce_loss(outputs, label_batch)
+                # loss_ce = ce_loss(outputs, label_batch[:].long())
+                loss_dice, mean_dice = dice_loss(outputs, label_batch, softmax=False)
                 loss = 0.4 * loss_ce + 0.6 * loss_dice
                 val_loss_sum += loss
                 val_loss_ce_sum += loss_ce

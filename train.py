@@ -17,7 +17,7 @@ parser.add_argument('--dataset', type=str,
 parser.add_argument('--list_dir', type=str,
                     default='./lists', help='list dir')
 parser.add_argument('--num_classes', type=int,
-                    default=5, help='output channel of network')
+                    default=4, help='output channel of network')
 parser.add_argument('--output_dir', default='./outputs', type=str, help='output dir')                   
 parser.add_argument('--max_iterations', type=int,
                     default=70000, help='maximum epoch number to train')
@@ -81,7 +81,7 @@ if __name__ == "__main__":
         'Severstal': {
             'root_path': args.root_path,
             'list_dir': './lists',
-            'num_classes': 5,
+            'num_classes': args.num_classes,
         },
     }
 

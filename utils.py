@@ -5,7 +5,7 @@ from scipy.ndimage import zoom
 import torch.nn as nn
 import SimpleITK as sitk
 import os
-from torchvision import transforms
+import torchvision.transforms as T
 
 class DiceLoss(nn.Module):
     def __init__(self, n_classes):
@@ -33,7 +33,12 @@ class DiceLoss(nn.Module):
     def forward(self, inputs, target, weight=None, softmax=False):
         if softmax:
             inputs = torch.softmax(inputs, dim=1)
-        target = self._one_hot_encoder(target)
+        else:
+            inputs = torch.sigmoid(inputs)
+        
+        if inputs.size() != target.size():
+            target = self._one_hot_encoder(target)
+            
         if weight is None:
             weight = [1] * self.n_classes
         assert inputs.size() == target.size(), 'predict {} & target {} shape do not match'.format(inputs.size(), target.size())
@@ -59,21 +64,51 @@ def calculate_metric_percase(pred, gt):
     else:
         return 0, 0
 
-# def test_batch(images, labels, net, classes, patch_size=[224, 224], test_save_path=None, cases=None):
-#     images = transforms.Resize(size=(224,224))(images)
-#     #labels = transforms.Resize(size=(224,224))(labels)
-#     thresholds_max=[0, 0.7,0.7,0.7,0.7]
-#     thresholds_min=[0, 0.2,0.2,0.3,0.3]
-#     min_area=[500, 500, 750, 1000]
-#     net.eval()
-#     with torch.no_grad():
-#         batch_preds = net(images).detach().cpu().numpy()
+def test_batch(images, labels, net, classes, output_size=[256,1600], test_save_path=None, cases=None):
+    print(output_size)
+    # print(output_size.dtype())
+    thresholds_max=[0.7,0.7,0.7,0.7]
+    thresholds_min=[0.2,0.2,0.3,0.3]
+    min_area=[500, 500, 750, 1000]
+    net.eval()
+    images, labels = images.cuda(), labels.cuda()
+    with torch.no_grad():
+        batch_preds = net(images)
+        batch_preds = T.Resize(size=output_size)(batch_preds)
+        batch_preds = torch.sigmoid(batch_preds).detach().cpu().numpy()
     
-#     for pred, fname in zip(batch_preds, cases):
-#         for i in range(1,5):
-#             p_channel = pred[i, :, :]
-#             p_channel_ = p_channel
-#             p_channel = (p_channel>thresholds_max[i]).astype(np.uint8)*i
+    labels = T.Resize(size=output_size)(labels)
+    labels = labels.cpu().detach().numpy()
+    predictions = np.zeros_like(labels)
+    for k in range(images.shape[0]):
+        pred = batch_preds[k]
+        fname = cases[k]
+        gt_label = labels[k]
+        pred_masks = []
+        for i in range(classes):
+            p_channel = pred[i]
+            p_channel_ = p_channel
+            p_channel = (p_channel>thresholds_max[i]).astype(np.uint8)
+            if p_channel.sum() < min_area[i]:
+                p_channel = np.zeros(p_channel.shape, dtype=p_channel.dtype)
+            else:
+                p_channel = (p_channel_>thresholds_min[i]).astype(np.uint8)
+            pred_masks.append(p_channel)
+        pred_masks = np.array(pred_masks)
+        predictions[k] = pred_masks
+        
+        if test_save_path is not None:
+            np.savez_compressed(os.path.join(test_save_path, fname + "_pred.npz"), label = gt_label, pred = pred_masks)
+
+
+    metric_list = []
+    for i in range(classes):
+        metric_list.append(calculate_metric_percase(predictions[:,i], labels[:,i]))  
+
+    return metric_list
+           
+
+
 
 
 

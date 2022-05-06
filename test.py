@@ -10,7 +10,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from dataset_severstal import Severstal_dataset
-from utils import test_single_batch
+from utils import test_single_batch, test_batch
 from networks.vision_transformer import SwinUnet as ViT_seg
 from trainer import trainer_severstal
 from config import get_config
@@ -21,7 +21,7 @@ parser.add_argument('--test_images_dir', type=str,
 parser.add_argument('--dataset', type=str,
                     default='Severstal', help='experiment_name')
 parser.add_argument('--num_classes', type=int,
-                    default=5, help='output channel of network')
+                    default=4, help='output channel of network')
 parser.add_argument('--list_dir', type=str,
                     default='./lists', help='list dir')
 parser.add_argument('--output_dir', type=str, help='output dir')   
@@ -30,6 +30,7 @@ parser.add_argument('--max_epochs', type=int, default=100, help='maximum epoch n
 parser.add_argument('--batch_size', type=int, default=24,
                     help='batch_size per gpu')
 parser.add_argument('--img_size', type=int, default=224, help='input patch size of network input')
+parser.add_argument('--output_size', type=int, nargs='+', default=[256,1600], help='output size of network output')
 parser.add_argument('--is_save', action="store_true", help='whether to save results during inference')
 parser.add_argument('--test_save_dir', type=str, default='../predictions', help='saving prediction as nii!')
 parser.add_argument('--deterministic', type=int,  default=1, help='whether use deterministic training')
@@ -64,21 +65,21 @@ config = get_config(args)
 
 
 def inference(args, model, test_save_path=None):
-    db_test = args.Dataset(base_dir=args.test_images_dir, split="test", list_dir=args.list_dir)
+    db_test = args.Dataset(base_dir=args.test_images_dir, list_dir=args.list_dir, split="test", output_size=(args.img_size, args.img_size))
     testloader = DataLoader(db_test, batch_size=24, shuffle=False, num_workers=1)
     logging.info("{} test iterations per epoch".format(len(testloader)))
     model.eval()
     metric_list = 0.0
     for i_batch, sampled_batch in tqdm(enumerate(testloader)):
-        h, w = sampled_batch["image"].size()[1:]
-        image, label, case_names = sampled_batch["image"], sampled_batch["label"], sampled_batch['case_name']
-        metric_i = test_single_batch(image, label, model, classes=args.num_classes, patch_size=[args.img_size, args.img_size],
+        h, w = sampled_batch["image"].size()[2:]
+        images, labels, case_names = sampled_batch["image"], sampled_batch["label"], sampled_batch['case_name']
+        metric_i = test_batch(images, labels, model, classes=args.num_classes, output_size=[args.output_size[0], args.output_size[1]],
                                       test_save_path=test_save_path, cases=case_names)
         metric_list += np.array(metric_i)
         logging.info('batch_idx %d mean_dice %f mean_hd95 %f' % (i_batch, np.mean(metric_i, axis=0)[0], np.mean(metric_i, axis=0)[1]))
     metric_list = metric_list / len(testloader)
-    for i in range(1, args.num_classes):
-        logging.info('Mean class %d mean_dice %f mean_hd95 %f' % (i, metric_list[i-1][0], metric_list[i-1][1]))
+    for i in range(args.num_classes):
+        logging.info('Mean class %d mean_dice %f mean_hd95 %f' % (i+1, metric_list[i][0], metric_list[i][1]))
     performance = np.mean(metric_list, axis=0)[0]
     mean_hd95 = np.mean(metric_list, axis=0)[1]
     logging.info('Testing performance in best val model: mean_dice : %f mean_hd95 : %f' % (performance, mean_hd95))
@@ -103,7 +104,7 @@ if __name__ == "__main__":
             'Dataset': Severstal_dataset,
             'test_images_dir': args.test_images_dir,
             'list_dir': './lists',
-            'num_classes': 5,
+            'num_classes': args.num_classes,
         },
     }
     dataset_name = args.dataset
