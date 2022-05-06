@@ -115,6 +115,7 @@ class Severstal_dataset(Dataset):
     def __getitem__(self, idx):
         slice_name = self.sample_list[idx].strip('\n')
         if 'train_images' in self.data_dir:
+            print("IN the dataset" + self.data_dir)
             fileName = slice_name + '.jpg'
             img = cv2.imread(os.path.join(self.data_dir, fileName))
             mask = self.maskGenerator.build_mask(fileName)
