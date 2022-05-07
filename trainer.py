@@ -56,7 +56,7 @@ def trainer_severstal(args, model, snapshot_path):
     max_iterations = args.max_epochs * len(trainloader)  # max_epoch = max_iterations // len(trainloader) + 1
     logging.info("{} iterations per epoch. {} max iterations ".format(len(trainloader), max_iterations))
     best_mean_dice = 0
-    weights=[1.5, 1.5, 1, 1]
+    weights=[1.4, 1.2, 1.4, 1]
     iterator = tqdm(range(max_epoch), ncols=70)
     for epoch_num in iterator:
         # Model Training
@@ -89,7 +89,7 @@ def trainer_severstal(args, model, snapshot_path):
             train_loss_sum += loss
             train_loss_ce_sum += loss_ce
             train_mean_dice_sum += mean_dice
-            logging.info('iteration %d : loss : %f, loss_ce: %f, mean_dice: %f' % (iter_num, loss.item(), loss_ce.item(), mean_dice))
+            # logging.info('iteration %d : loss : %f, loss_ce: %f, mean_dice: %f' % (iter_num, loss.item(), loss_ce.item(), mean_dice))
 
             if iter_num % 20 == 0:
                 image = image_batch[1, 0:1, :, :]
