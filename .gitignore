@@ -2,3 +2,5 @@ outputs/
 pretrained_ckpt/
 *.pth
 *.pyc
+test_log/
+test_log/

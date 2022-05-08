@@ -44,11 +44,15 @@ class DiceLoss(nn.Module):
         assert inputs.size() == target.size(), 'predict {} & target {} shape do not match'.format(inputs.size(), target.size())
         class_wise_dice = []
         loss = 0.0
+        preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
+        preds = preds.cpu().detach().numpy()
+        labels = torch.argmax(target, dim=1).cpu().detach().numpy()
         for i in range(0, self.n_classes):
             dice = self._dice_loss(inputs[:, i], target[:, i])
-            class_wise_dice.append(1.0 - dice.item())
+            # class_wise_dice.append(1.0 - dice.item())
+            class_wise_dice.append(calculate_metric_percase(preds == i, labels == i))
             loss += dice * weight[i]
-        mean_dice = sum(class_wise_dice) / len(class_wise_dice)
+        mean_dice = np.mean(class_wise_dice, axis=0)[0]
         return loss / self.n_classes, mean_dice
 
 
@@ -64,8 +68,8 @@ def calculate_metric_percase(pred, gt):
     else:
         return 0, 0
 
-def test_batch(images, labels, net, classes, output_size=[256,1600], test_save_path=None, cases=None):
-    print(output_size)
+def test_batch_1(images, labels, net, classes, output_size=[256,1600], test_save_path=None, cases=None):
+    # print(output_size)
     # print(output_size.dtype())
     thresholds_max=[0.7,0.7,0.7,0.7]
     thresholds_min=[0.2,0.2,0.3,0.3]
@@ -108,8 +112,32 @@ def test_batch(images, labels, net, classes, output_size=[256,1600], test_save_p
     return metric_list
            
 
+def test_batch(images, labels, net, classes, output_size=[256, 1600], test_save_path=None, cases=None):
+    
+    images, labels = images.cuda(), labels.cuda()
+    with torch.no_grad():
+        batch_preds = net(images)
+        batch_preds = torch.argmax(torch.softmax(batch_preds, dim=1), dim=1)
+    
+    predictions = batch_preds.cpu().detach().numpy()
+    x,y = predictions.shape[1:]
+    predictions = zoom(predictions, (1, output_size[0]/x, output_size[1]/y), order=0)
+    
+    labels = labels.cpu().detach().numpy()
+    labels = zoom(labels, (1, output_size[0]/x, output_size[1]/y), order=0)
+    
+    if test_save_path is not None:
+        for k in range(images.shape[0]):
+            pred = predictions[k]
+            fname = cases[k]
+            gt_label = labels[k]
+            np.savez_compressed(os.path.join(test_save_path, fname + "_pred.npz"), label = gt_label, pred = pred)
 
+    metric_list = []
+    for i in range(1, classes):
+        metric_list.append(calculate_metric_percase(predictions == i, labels == i))  
 
+    return metric_list
 
 
 def test_single_batch(image, label, net, classes, patch_size=[224, 224], test_save_path=None, cases=None):

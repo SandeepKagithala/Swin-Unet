@@ -10,7 +10,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from dataset_severstal import Severstal_dataset
-from utils import test_single_batch, test_batch
+from utils import test_single_batch, test_batch, test_batch_1
 from networks.vision_transformer import SwinUnet as ViT_seg
 from trainer import trainer_severstal
 from config import get_config
@@ -21,7 +21,7 @@ parser.add_argument('--test_images_dir', type=str,
 parser.add_argument('--dataset', type=str,
                     default='Severstal', help='experiment_name')
 parser.add_argument('--num_classes', type=int,
-                    default=4, help='output channel of network')
+                    default=5, help='output channel of network')
 parser.add_argument('--list_dir', type=str,
                     default='./lists', help='list dir')
 parser.add_argument('--output_dir', type=str, help='output dir')   

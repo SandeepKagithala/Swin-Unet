@@ -56,7 +56,7 @@ def trainer_severstal(args, model, snapshot_path):
     max_iterations = args.max_epochs * len(trainloader)  # max_epoch = max_iterations // len(trainloader) + 1
     logging.info("{} iterations per epoch. {} max iterations ".format(len(trainloader), max_iterations))
     best_mean_dice = 0
-    weights=[1.4, 1.2, 1.4, 1]
+    weights=[1, 1.4, 1, 1.4, 1]
     iterator = tqdm(range(max_epoch), ncols=70)
     for epoch_num in iterator:
         # Model Training
@@ -69,10 +69,10 @@ def trainer_severstal(args, model, snapshot_path):
             image_batch, label_batch = image_batch.cuda(), label_batch.cuda()
             with torch.set_grad_enabled(True):
                 outputs = model(image_batch)
-                loss_ce = bce_loss(outputs, label_batch)
-                # loss_ce = ce_loss(outputs, label_batch[:].long())
-                loss_dice, mean_dice = dice_loss(outputs, label_batch, weight=weights, softmax=False)
-                loss = 0.4 * loss_ce + 0.6 * loss_dice
+                # loss_ce = bce_loss(outputs, label_batch)
+                loss_ce = ce_loss(outputs, label_batch[:].long())
+                loss_dice, mean_dice = dice_loss(outputs, label_batch, weight=weights, softmax=True)
+                loss = 0.3 * loss_ce + 0.7 * loss_dice
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -95,10 +95,10 @@ def trainer_severstal(args, model, snapshot_path):
                 image = image_batch[1, 0:1, :, :]
                 image = (image - image.min()) / (image.max() - image.min())
                 writer.add_image('train/Image', image, iter_num)
-                # outputs = torch.argmax(torch.softmax(outputs, dim=1), dim=1, keepdim=True)
-                outputs = torch.sigmoid(outputs)
+                outputs = torch.argmax(torch.softmax(outputs, dim=1), dim=1, keepdim=True)
+                # outputs = torch.sigmoid(outputs)
                 writer.add_image('train/Prediction', outputs[1, ...] * 50, iter_num)
-                labs = label_batch[1, ...] * 50
+                labs = label_batch[1, ...].unsqueeze(0) * 50
                 writer.add_image('train/GroundTruth', labs, iter_num)
 
         avg_train_loss = train_loss_sum / len(trainloader)
@@ -121,10 +121,10 @@ def trainer_severstal(args, model, snapshot_path):
 
             with torch.no_grad():
                 outputs = model(image_batch)
-                loss_ce = bce_loss(outputs, label_batch)
-                # loss_ce = ce_loss(outputs, label_batch[:].long())
-                loss_dice, mean_dice = dice_loss(outputs, label_batch, softmax=False)
-                loss = 0.4 * loss_ce + 0.6 * loss_dice
+                # loss_ce = bce_loss(outputs, label_batch)
+                loss_ce = ce_loss(outputs, label_batch[:].long())
+                loss_dice, mean_dice = dice_loss(outputs, label_batch, softmax=True)
+                loss = 0.3 * loss_ce + 0.7 * loss_dice
                 val_loss_sum += loss
                 val_loss_ce_sum += loss_ce
                 val_mean_dice_sum += mean_dice

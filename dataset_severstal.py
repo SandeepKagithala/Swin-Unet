@@ -48,7 +48,7 @@ class MaskGenerator:
             for index, start in enumerate(starts):
                 begin = int(start - 1)
                 end = int(begin + lengths[index])
-                mask[begin : end] = 1 #class_id
+                mask[begin : end] = class_id
             
         rle_mask = mask.reshape(width, height).T
         return rle_mask 
@@ -60,7 +60,7 @@ class MaskGenerator:
         for _,val in sub_df.iterrows():
             masks[:, :, val['ClassId']-1] = self.rle2mask(val['EncodedPixels'], mask_shape, val['ClassId'])
         
-        # mask = np.max(masks, axis=-1)
+        masks = np.max(masks, axis=-1)
         return masks
 
 
@@ -98,11 +98,13 @@ class Severstal_dataset(Dataset):
             T.Normalize(mean = (0.485, 0.456, 0.406), std = (0.229, 0.224, 0.225)),
             T.Resize(size=output_size)
         ])
-        self.gt_transform = T.Compose([T.ToTensor(), T.Resize(size=output_size)])
+        self.gt_transform = T.Compose([T.ToTensor(), 
+                                    #    T.Resize(size=output_size)
+                                       ])
         
         self.rand_transform = A.Compose(
             [
-                A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2),
+                A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3),
                 A.HorizontalFlip(),
                 A.VerticalFlip(),
                 A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=20),
@@ -118,7 +120,7 @@ class Severstal_dataset(Dataset):
             fileName = slice_name + '.jpg'
             img = cv2.imread(os.path.join(self.data_dir, fileName))
             mask = self.maskGenerator.build_mask(fileName)
-            print(type(img), isinstance(img, np.ndarray))
+            # print(type(img), isinstance(img, np.ndarray))
         else:
             data_path = os.path.join(self.data_dir, self.split, slice_name+'.npz')
             data = np.load(data_path)
@@ -127,10 +129,13 @@ class Severstal_dataset(Dataset):
         if self.split == 'train':
             transformed = self.rand_transform(image=img, mask=mask)
             image = self.img_transform(transformed['image'])
-            label = self.gt_transform(transformed['mask'])
+            label = self.gt_transform(transformed['mask']).squeeze(0)
         else:
             image = self.img_transform(img)
-            label = self.gt_transform(mask)
+            label = self.gt_transform(mask).squeeze(0)
+        
+        x,y = label.shape
+        label = zoom(label, (self.output_size[0]/x, self.output_size[1]/y), order=0)
 
         sample = {'image': image, 'label': label, 'case_name' :  self.sample_list[idx].strip('\n')}
         
