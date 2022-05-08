@@ -45,16 +45,25 @@ class DiceLoss(nn.Module):
         class_wise_dice = []
         loss = 0.0
         preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
-        preds = preds.cpu().detach().numpy()
-        labels = torch.argmax(target, dim=1).cpu().detach().numpy()
+        preds = self._one_hot_encoder(preds)
         for i in range(0, self.n_classes):
             dice = self._dice_loss(inputs[:, i], target[:, i])
-            # class_wise_dice.append(1.0 - dice.item())
-            class_wise_dice.append(calculate_metric_percase(preds == i, labels == i))
+            dice2 = self._dice_loss(preds[:, i], target[:, i])
+            class_wise_dice.append(1.0 - dice2.item())
+            # class_wise_dice.append(calculate_metric_percase(preds == i, labels == i))
             loss += dice * weight[i]
-        mean_dice = np.mean(class_wise_dice, axis=0)[0]
+        mean_dice = sum(class_wise_dice)/self.n_classes
+        # mean_dice = np.mean(class_wise_dice, axis=0)[0]
         return loss / self.n_classes, mean_dice
 
+def calculate_dice_score(pred, target):
+    target = target.astype(np.float32)
+    smooth = 1e-5
+    intersect = np.sum(pred * target)
+    y_sum = np.sum(target * target)
+    z_sum = np.sum(pred * pred)
+    dice = (2 * intersect + smooth) / (z_sum + y_sum + smooth)
+    return dice
 
 def calculate_metric_percase(pred, gt):
     pred[pred > 0] = 1
@@ -117,13 +126,12 @@ def test_batch(images, labels, net, classes, output_size=[256, 1600], test_save_
     images, labels = images.cuda(), labels.cuda()
     with torch.no_grad():
         batch_preds = net(images)
-        batch_preds = torch.argmax(torch.softmax(batch_preds, dim=1), dim=1)
+        predictions = torch.argmax(torch.softmax(batch_preds, dim=1), dim=1)
     
-    predictions = batch_preds.cpu().detach().numpy()
+    predictions = predictions.cpu().detach().numpy()
+    labels = labels.cpu().detach().numpy()
     x,y = predictions.shape[1:]
     predictions = zoom(predictions, (1, output_size[0]/x, output_size[1]/y), order=0)
-    
-    labels = labels.cpu().detach().numpy()
     labels = zoom(labels, (1, output_size[0]/x, output_size[1]/y), order=0)
     
     if test_save_path is not None:
