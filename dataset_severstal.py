@@ -91,7 +91,8 @@ class Severstal_dataset(Dataset):
         self.sample_list = open(os.path.join(list_dir, self.split+'.txt')).readlines()
         self.data_dir = base_dir
         self.output_size = output_size
-        self.maskGenerator = MaskGenerator(os.path.join(list_dir, 'mask_data.csv'))
+        if os.path.exists(os.path.join(list_dir, 'mask_data.csv')):
+            self.maskGenerator = MaskGenerator(os.path.join(list_dir, 'mask_data.csv'))
 
         self.img_transform = T.Compose([
             T.ToTensor(),
@@ -116,7 +117,7 @@ class Severstal_dataset(Dataset):
 
     def __getitem__(self, idx):
         slice_name = self.sample_list[idx].strip('\n')
-        if 'train_images' in self.data_dir:
+        if 'train_images' in self.data_dir and self.maskGenerator is not None:
             fileName = slice_name + '.jpg'
             img = cv2.imread(os.path.join(self.data_dir, fileName))
             mask = self.maskGenerator.build_mask(fileName)
