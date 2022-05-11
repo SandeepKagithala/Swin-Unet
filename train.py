@@ -80,7 +80,7 @@ if __name__ == "__main__":
     dataset_config = {
         'Severstal': {
             'root_path': args.root_path,
-            'list_dir': './lists',
+            'list_dir': args.list_dir,
             'num_classes': args.num_classes,
         },
     }

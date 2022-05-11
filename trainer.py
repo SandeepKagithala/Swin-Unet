@@ -84,7 +84,6 @@ def trainer_severstal(args, model, snapshot_path):
             writer.add_scalar('info/lr', lr_, iter_num)
             writer.add_scalar('info/total_loss', loss, iter_num)
             writer.add_scalar('info/loss_ce', loss_ce, iter_num)
-            writer.add_scalar('info/train_mean_dice', mean_dice, iter_num)
 
             train_loss_sum += loss
             train_loss_ce_sum += loss_ce

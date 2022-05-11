@@ -103,7 +103,7 @@ if __name__ == "__main__":
         'Severstal': {
             'Dataset': Severstal_dataset,
             'test_images_dir': args.test_images_dir,
-            'list_dir': './lists',
+            'list_dir': args.list_dir,
             'num_classes': args.num_classes,
         },
     }
