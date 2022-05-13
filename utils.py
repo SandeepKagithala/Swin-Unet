@@ -202,7 +202,8 @@ def test_batch(images, labels, net, classes, output_size=[256, 1600], test_save_
 
     metric_list = []
     for i in range(1, classes):
-        metric_list.append(calculate_metric_percase(predictions == i, labels == i))  
+        # metric_list.append(calculate_metric_percase(predictions == i, labels == i))  
+        metric_list.append(calculate_dice_score(predictions == i, labels == i))
 
     return metric_list
 
