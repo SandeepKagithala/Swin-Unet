@@ -56,6 +56,65 @@ class DiceLoss(nn.Module):
         # mean_dice = np.mean(class_wise_dice, axis=0)[0]
         return loss / self.n_classes, mean_dice
 
+class TverskyLoss(nn.Module):
+    def __init__(self, n_classes):
+        super(TverskyLoss, self).__init__()
+        self.n_classes = n_classes
+
+    def _one_hot_encoder(self, input_tensor):
+        tensor_list = []
+        for i in range(self.n_classes):
+            temp_prob = input_tensor == i  # * torch.ones_like(input_tensor)
+            tensor_list.append(temp_prob.unsqueeze(1))
+        output_tensor = torch.cat(tensor_list, dim=1)
+        return output_tensor.float()
+
+    def _tversky_loss(self, input, target, alpha=1, beta=1.5):
+        target = target.float()
+        smooth = 1e-5
+        tp = torch.sum(input * target)
+        fp = torch.sum((1 - target) * input)
+        fn = torch.sum(target * (1 - input))
+        tversky = (tp + smooth) / (tp + alpha*fp + beta*fn + smooth)
+        loss = 1 - tversky
+        return loss
+
+    def _dice_coeff(self, input, target):
+        target = target.float()
+        smooth = 1e-5
+        intersect = torch.sum(input * target)
+        y_sum = torch.sum(target * target)
+        z_sum = torch.sum(input * input)
+        dice = (2 * intersect + smooth) / (z_sum + y_sum + smooth)
+        return dice
+
+    def forward(self, inputs, target, weight=None, softmax=False):
+        if softmax:
+            inputs = torch.softmax(inputs, dim=1)
+        else:
+            inputs = torch.sigmoid(inputs)
+        
+        if inputs.size() != target.size():
+            target = self._one_hot_encoder(target)
+            
+        if weight is None:
+            weight = [1] * self.n_classes
+        assert inputs.size() == target.size(), 'predict {} & target {} shape do not match'.format(inputs.size(), target.size())
+        class_wise_dice = []
+        loss = 0.0
+
+        if softmax:
+            preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
+            preds = self._one_hot_encoder(preds)
+        
+        for i in range(0, self.n_classes):
+            tversky_loss = self._tversky_loss(inputs[:, i], target[:, i])
+            dice = self._dice_coeff(preds[:, i], target[:, i])
+            class_wise_dice.append(dice.item())
+            loss += tversky_loss * weight[i]
+        mean_dice = sum(class_wise_dice)/self.n_classes
+        return loss / self.n_classes, mean_dice
+
 def calculate_dice_score(pred, target):
     target = target.astype(np.float32)
     smooth = 1e-5

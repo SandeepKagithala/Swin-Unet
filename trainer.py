@@ -13,14 +13,14 @@ from tensorboardX import SummaryWriter
 from torch.nn.modules.loss import CrossEntropyLoss, BCEWithLogitsLoss
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from utils import DiceLoss
+from utils import DiceLoss, TverskyLoss
 from torchvision import transforms
 from utils import test_single_batch
 from dataset_severstal import Severstal_dataset, RandomGenerator
 
 def trainer_severstal(args, model, snapshot_path):
     
-    logging.basicConfig(filename=snapshot_path + "/log_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".txt", level=logging.INFO,
+    logging.basicConfig(filename=snapshot_path + "/log_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".log", level=logging.INFO,
                         format='[%(asctime)s.%(msecs)03d] %(message)s', datefmt='%H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
@@ -49,6 +49,7 @@ def trainer_severstal(args, model, snapshot_path):
     ce_loss = CrossEntropyLoss()
     bce_loss = BCEWithLogitsLoss()
     dice_loss = DiceLoss(num_classes)
+    tversky_loss = TverskyLoss(num_classes)
     optimizer = optim.SGD(model.parameters(), lr=base_lr, momentum=0.9, weight_decay=0.0001)
     writer = SummaryWriter(snapshot_path + '/log/' + datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
     iter_num = 0
@@ -71,8 +72,10 @@ def trainer_severstal(args, model, snapshot_path):
                 outputs = model(image_batch)
                 # loss_ce = bce_loss(outputs, label_batch)
                 loss_ce = ce_loss(outputs, label_batch[:].long())
-                loss_dice, mean_dice = dice_loss(outputs, label_batch, weight=weights, softmax=True)
-                loss = 0.3 * loss_ce + 0.7 * loss_dice
+                # loss_dice, mean_dice = dice_loss(outputs, label_batch, weight=weights, softmax=True)
+                # loss = 0.3 * loss_ce + 0.7 * loss_dice
+                loss_tversky, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=True)
+                loss = 0.4 * loss_ce + 0.6 * loss_tversky
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
