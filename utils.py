@@ -102,10 +102,13 @@ class TverskyLoss(nn.Module):
         assert inputs.size() == target.size(), 'predict {} & target {} shape do not match'.format(inputs.size(), target.size())
         class_wise_dice = []
         loss = 0.0
-
+        thresholds=[0.4, 0.2, 0.2, 0.3, 0.3]
         if softmax:
             preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
             preds = self._one_hot_encoder(preds)
+        else:
+            for i in range(self.n_classes):
+                preds[:, i] = (preds[:, i] > thresholds[i]).astype(np.uint8)
         
         for i in range(0, self.n_classes):
             tversky_loss = self._tversky_loss(inputs[:, i], target[:, i])
@@ -124,6 +127,14 @@ def calculate_dice_score(pred, target):
     dice = (2 * intersect + smooth) / (z_sum + y_sum + smooth)
     return dice
 
+def one_hot_encoder(input_tensor, num_classes):
+        tensor_list = []
+        for i in range(num_classes):
+            temp_prob = input_tensor == i  # * torch.ones_like(input_tensor)
+            tensor_list.append(temp_prob.unsqueeze(1))
+        output_tensor = torch.cat(tensor_list, dim=1)
+        return output_tensor
+
 def calculate_metric_percase(pred, gt):
     pred[pred > 0] = 1
     gt[gt > 0] = 1
@@ -139,9 +150,9 @@ def calculate_metric_percase(pred, gt):
 def test_batch_1(images, labels, net, classes, output_size=[256,1600], test_save_path=None, cases=None):
     # print(output_size)
     # print(output_size.dtype())
-    thresholds_max=[0.7,0.7,0.7,0.7]
-    thresholds_min=[0.2,0.2,0.3,0.3]
-    min_area=[500, 500, 750, 1000]
+    thresholds_max=[0.7, 0.7,0.7,0.7,0.7]
+    thresholds_min=[0.4, 0.2,0.2,0.3,0.3]
+    min_area=[1000, 500, 500, 750, 1000]
     net.eval()
     images, labels = images.cuda(), labels.cuda()
     with torch.no_grad():
@@ -149,8 +160,12 @@ def test_batch_1(images, labels, net, classes, output_size=[256,1600], test_save
         batch_preds = T.Resize(size=output_size)(batch_preds)
         batch_preds = torch.sigmoid(batch_preds).detach().cpu().numpy()
     
-    labels = T.Resize(size=output_size)(labels)
+    # labels = T.Resize(size=output_size)(labels)
+    labels = one_hot_encoder(labels, classes)
     labels = labels.cpu().detach().numpy()
+    x, y = labels.shape[2:]
+    labels = zoom(labels, (1, output_size[0]/x, output_size[1]/y), order=0)
+    
     predictions = np.zeros_like(labels)
     for k in range(images.shape[0]):
         pred = batch_preds[k]
@@ -175,7 +190,8 @@ def test_batch_1(images, labels, net, classes, output_size=[256,1600], test_save
 
     metric_list = []
     for i in range(classes):
-        metric_list.append(calculate_metric_percase(predictions[:,i], labels[:,i]))  
+        # metric_list.append(calculate_metric_percase(predictions[:,i], labels[:,i])) 
+        metric_list.append(calculate_dice_score(predictions[:,i], labels[:,i])) 
 
     return metric_list
            
