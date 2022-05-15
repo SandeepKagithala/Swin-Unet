@@ -73,7 +73,7 @@ def inference(args, model, test_save_path=None):
     for i_batch, sampled_batch in tqdm(enumerate(testloader)):
         h, w = sampled_batch["image"].size()[2:]
         images, labels, case_names = sampled_batch["image"], sampled_batch["label"], sampled_batch['case_name']
-        metric_i = test_batch(images, labels, model, classes=args.num_classes, output_size=[args.output_size[0], args.output_size[1]],
+        metric_i = test_batch_1(images, labels, model, classes=args.num_classes, output_size=[args.output_size[0], args.output_size[1]],
                                       test_save_path=test_save_path, cases=case_names)
         metric_list += np.array(metric_i)
         # logging.info('batch_idx %d mean_dice %f mean_hd95 %f' % (i_batch, np.mean(metric_i, axis=0)[0], np.mean(metric_i, axis=0)[1]))
