@@ -217,3 +217,72 @@
 [16:58:46.140] Mean class 3 mean_dice 0.642117 mean_hd95 40.051028
 [16:58:46.140] Mean class 4 mean_dice 0.754191 mean_hd95 16.650421
 [16:58:46.141] Testing performance in best val model: mean_dice : 0.701764 mean_hd95 : 27.026484
+[15:27:47.301] Namespace(Dataset=<class 'dataset_severstal.Severstal_dataset'>, accumulation_steps=None, amp_opt_level='O1', base_lr=0.02, batch_size=24, cache_mode='part', cfg='configs/swin_tiny_patch4_window7_224_lite.yaml', dataset='Severstal', deterministic=1, eval=False, img_size=224, is_pretrain=True, is_save=False, list_dir='./lists/list_split', max_epochs=100, max_iterations=50000, num_classes=5, opts=None, output_dir='../kaggle_outputs_2/', output_size=[256, 320], resume=None, seed=1234, tag=None, test_images_dir='../dataset_new2/', test_save_dir='../predictions', throughput=False, use_checkpoint=False, zip=False)
+[15:27:47.331] best_model.pth
+[15:27:47.357] 25 test iterations per epoch
+[15:28:51.846] Namespace(Dataset=<class 'dataset_severstal.Severstal_dataset'>, accumulation_steps=None, amp_opt_level='O1', base_lr=0.02, batch_size=24, cache_mode='part', cfg='configs/swin_tiny_patch4_window7_224_lite.yaml', dataset='Severstal', deterministic=1, eval=False, img_size=224, is_pretrain=True, is_save=False, list_dir='./lists/list_split', max_epochs=100, max_iterations=50000, num_classes=5, opts=None, output_dir='../kaggle_outputs_2/', output_size=[256, 320], resume=None, seed=1234, tag=None, test_images_dir='../dataset_new2/', test_save_dir='../predictions', throughput=False, use_checkpoint=False, zip=False)
+[15:28:51.846] best_model.pth
+[15:28:51.847] 25 test iterations per epoch
+[15:28:55.565] batch_idx 0 mean_dice 0.352171
+[15:28:56.182] batch_idx 1 mean_dice 0.333889
+[15:28:56.755] batch_idx 2 mean_dice 0.403032
+[15:28:57.312] batch_idx 3 mean_dice 0.357752
+[15:28:57.863] batch_idx 4 mean_dice 0.351459
+[15:28:58.410] batch_idx 5 mean_dice 0.363378
+[15:28:58.959] batch_idx 6 mean_dice 0.387630
+[15:28:59.534] batch_idx 7 mean_dice 0.396686
+[15:29:00.108] batch_idx 8 mean_dice 0.416303
+[15:29:00.665] batch_idx 9 mean_dice 0.368866
+[15:29:01.227] batch_idx 10 mean_dice 0.380856
+[15:29:01.821] batch_idx 11 mean_dice 0.370101
+[15:29:02.380] batch_idx 12 mean_dice 0.386194
+[15:29:02.938] batch_idx 13 mean_dice 0.375400
+[15:29:03.510] batch_idx 14 mean_dice 0.337316
+[15:29:04.076] batch_idx 15 mean_dice 0.374619
+[15:29:04.646] batch_idx 16 mean_dice 0.349475
+[15:29:05.203] batch_idx 17 mean_dice 0.362420
+[15:29:05.771] batch_idx 18 mean_dice 0.326200
+[15:29:06.340] batch_idx 19 mean_dice 0.359850
+[15:29:06.920] batch_idx 20 mean_dice 0.339592
+[15:29:07.485] batch_idx 21 mean_dice 0.344745
+[15:29:08.039] batch_idx 22 mean_dice 0.298444
+[15:29:08.590] batch_idx 23 mean_dice 0.326566
+[15:29:09.175] batch_idx 24 mean_dice 0.360157
+[15:29:09.412] Mean class 1 mean_dice 0.952908 
+[15:29:09.412] Mean class 2 mean_dice 0.152479 
+[15:29:09.413] Mean class 3 mean_dice 0.112014 
+[15:29:09.413] Mean class 4 mean_dice 0.271184 
+[15:29:09.414] Testing performance in best val model: mean_dice : 0.360924 
+[15:31:54.124] Namespace(Dataset=<class 'dataset_severstal.Severstal_dataset'>, accumulation_steps=None, amp_opt_level='O1', base_lr=0.02, batch_size=24, cache_mode='part', cfg='configs/swin_tiny_patch4_window7_224_lite.yaml', dataset='Severstal', deterministic=1, eval=False, img_size=224, is_pretrain=True, is_save=False, list_dir='./lists/list_split', max_epochs=100, max_iterations=50000, num_classes=5, opts=None, output_dir='../kaggle_outputs_2/', output_size=[256, 320], resume=None, seed=1234, tag=None, test_images_dir='../dataset_new2/', test_save_dir='../predictions', throughput=False, use_checkpoint=False, zip=False)
+[15:31:54.125] best_model.pth
+[15:31:54.126] 25 test iterations per epoch
+[15:31:57.671] batch_idx 0 mean_dice 0.791118
+[15:31:58.087] batch_idx 1 mean_dice 0.740011
+[15:31:58.505] batch_idx 2 mean_dice 0.816382
+[15:31:58.928] batch_idx 3 mean_dice 0.657773
+[15:31:59.351] batch_idx 4 mean_dice 0.685659
+[15:31:59.772] batch_idx 5 mean_dice 0.758603
+[15:32:00.200] batch_idx 6 mean_dice 0.715476
+[15:32:00.616] batch_idx 7 mean_dice 0.734203
+[15:32:01.053] batch_idx 8 mean_dice 0.764711
+[15:32:01.490] batch_idx 9 mean_dice 0.680403
+[15:32:01.912] batch_idx 10 mean_dice 0.767364
+[15:32:02.342] batch_idx 11 mean_dice 0.803429
+[15:32:02.761] batch_idx 12 mean_dice 0.751367
+[15:32:03.175] batch_idx 13 mean_dice 0.818598
+[15:32:03.608] batch_idx 14 mean_dice 0.705597
+[15:32:04.030] batch_idx 15 mean_dice 0.818100
+[15:32:04.454] batch_idx 16 mean_dice 0.727174
+[15:32:04.876] batch_idx 17 mean_dice 0.781064
+[15:32:05.306] batch_idx 18 mean_dice 0.739961
+[15:32:05.723] batch_idx 19 mean_dice 0.803662
+[15:32:06.146] batch_idx 20 mean_dice 0.672256
+[15:32:06.577] batch_idx 21 mean_dice 0.792700
+[15:32:07.026] batch_idx 22 mean_dice 0.681129
+[15:32:07.444] batch_idx 23 mean_dice 0.783440
+[15:32:07.867] batch_idx 24 mean_dice 0.728855
+[15:32:08.122] Mean class 1 mean_dice 0.698956 
+[15:32:08.122] Mean class 2 mean_dice 0.782030 
+[15:32:08.122] Mean class 3 mean_dice 0.751632 
+[15:32:08.123] Mean class 4 mean_dice 0.762427 
+[15:32:08.123] Testing performance in best val model: mean_dice : 0.748761 

@@ -107,8 +107,9 @@ class TverskyLoss(nn.Module):
             preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
             preds = self._one_hot_encoder(preds)
         else:
-            for i in range(self.n_classes):
-                preds[:, i] = (preds[:, i] > thresholds[i]).astype(np.uint8)
+            preds = inputs.clone()
+            # for i in range(self.n_classes):
+            #     preds[:, i] = (preds[:, i] > thresholds[i]).to(torch.uint8)
         
         for i in range(0, self.n_classes):
             tversky_loss = self._tversky_loss(inputs[:, i], target[:, i])
@@ -133,7 +134,7 @@ def one_hot_encoder(input_tensor, num_classes):
             temp_prob = input_tensor == i  # * torch.ones_like(input_tensor)
             tensor_list.append(temp_prob.unsqueeze(1))
         output_tensor = torch.cat(tensor_list, dim=1)
-        return output_tensor
+        return output_tensor.float()
 
 def calculate_metric_percase(pred, gt):
     pred[pred > 0] = 1
@@ -164,7 +165,7 @@ def test_batch_1(images, labels, net, classes, output_size=[256,1600], test_save
     labels = one_hot_encoder(labels, classes)
     labels = labels.cpu().detach().numpy()
     x, y = labels.shape[2:]
-    labels = zoom(labels, (1, output_size[0]/x, output_size[1]/y), order=0)
+    labels = zoom(labels, (1, 1, output_size[0]/x, output_size[1]/y), order=0)
     
     predictions = np.zeros_like(labels)
     for k in range(images.shape[0]):
