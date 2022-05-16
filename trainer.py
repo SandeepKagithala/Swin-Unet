@@ -70,8 +70,8 @@ def trainer_severstal(args, model, snapshot_path):
             image_batch, label_batch = image_batch.cuda(), label_batch.cuda()
             with torch.set_grad_enabled(True):
                 outputs = model(image_batch)
-                # loss_ce = bce_loss(outputs, label_batch)
-                loss_ce = ce_loss(outputs, label_batch[:].long())
+                loss_ce = bce_loss(outputs, label_batch)
+                # loss_ce = ce_loss(outputs, label_batch[:].long())
                 # loss_dice, mean_dice = dice_loss(outputs, label_batch, weight=weights, softmax=True)
                 # loss = 0.3 * loss_ce + 0.7 * loss_dice
                 loss_tversky, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
