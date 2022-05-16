@@ -44,8 +44,15 @@ class DiceLoss(nn.Module):
         assert inputs.size() == target.size(), 'predict {} & target {} shape do not match'.format(inputs.size(), target.size())
         class_wise_dice = []
         loss = 0.0
-        preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
-        preds = self._one_hot_encoder(preds)
+        thresholds=[0.4, 0.2, 0.2, 0.3, 0.3]
+        if softmax:
+            preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
+            preds = self._one_hot_encoder(preds)
+        else:
+            preds = inputs.clone()
+            for i in range(self.n_classes):
+                preds[:, i] = (preds[:, i] > thresholds[i]).float()
+
         for i in range(0, self.n_classes):
             dice = self._dice_loss(inputs[:, i], target[:, i])
             dice2 = self._dice_loss(preds[:, i], target[:, i])
@@ -69,14 +76,15 @@ class TverskyLoss(nn.Module):
         output_tensor = torch.cat(tensor_list, dim=1)
         return output_tensor.float()
 
-    def _tversky_loss(self, input, target, alpha=1, beta=1.5):
+    def _tversky_loss(self, input, target, beta=0.7, gamma=0.75):
         target = target.float()
         smooth = 1e-5
         tp = torch.sum(input * target)
         fp = torch.sum((1 - target) * input)
         fn = torch.sum(target * (1 - input))
-        tversky = (tp + smooth) / (tp + alpha*fp + beta*fn + smooth)
+        tversky = (tp + smooth) / (tp + (1-beta)*fp + beta*fn + smooth)
         loss = 1 - tversky
+        loss = torch.pow(loss, gamma)
         return loss
 
     def _dice_coeff(self, input, target):
@@ -108,8 +116,8 @@ class TverskyLoss(nn.Module):
             preds = self._one_hot_encoder(preds)
         else:
             preds = inputs.clone()
-            # for i in range(self.n_classes):
-            #     preds[:, i] = (preds[:, i] > thresholds[i]).to(torch.uint8)
+            for i in range(self.n_classes):
+                preds[:, i] = (preds[:, i] > thresholds[i]).float()
         
         for i in range(0, self.n_classes):
             tversky_loss = self._tversky_loss(inputs[:, i], target[:, i])
