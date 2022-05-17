@@ -44,14 +44,9 @@ class DiceLoss(nn.Module):
         assert inputs.size() == target.size(), 'predict {} & target {} shape do not match'.format(inputs.size(), target.size())
         class_wise_dice = []
         loss = 0.0
-        thresholds=[0.4, 0.2, 0.2, 0.3, 0.3]
-        if softmax:
-            preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
-            preds = self._one_hot_encoder(preds)
-        else:
-            preds = inputs.clone()
-            for i in range(self.n_classes):
-                preds[:, i] = (preds[:, i] > thresholds[i]).float()
+
+        preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
+        preds = self._one_hot_encoder(preds)
 
         for i in range(0, self.n_classes):
             dice = self._dice_loss(inputs[:, i], target[:, i])
@@ -76,7 +71,7 @@ class TverskyLoss(nn.Module):
         output_tensor = torch.cat(tensor_list, dim=1)
         return output_tensor.float()
 
-    def _tversky_loss(self, input, target, beta=0.7, gamma=0.75):
+    def _tversky_loss(self, input, target, beta=0.7):
         target = target.float()
         smooth = 1e-5
         tp = torch.sum(input * target)
@@ -84,7 +79,7 @@ class TverskyLoss(nn.Module):
         fn = torch.sum(target * (1 - input))
         tversky = (tp + smooth) / (tp + (1-beta)*fp + beta*fn + smooth)
         loss = 1 - tversky
-        loss = torch.pow(loss, gamma)
+        # loss = torch.pow(loss, gamma)
         return loss
 
     def _dice_coeff(self, input, target):
@@ -110,14 +105,9 @@ class TverskyLoss(nn.Module):
         assert inputs.size() == target.size(), 'predict {} & target {} shape do not match'.format(inputs.size(), target.size())
         class_wise_dice = []
         loss = 0.0
-        thresholds=[0.4, 0.2, 0.2, 0.3, 0.3]
-        if softmax:
-            preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
-            preds = self._one_hot_encoder(preds)
-        else:
-            preds = inputs.clone()
-            for i in range(self.n_classes):
-                preds[:, i] = (preds[:, i] > thresholds[i]).float()
+
+        preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
+        preds = self._one_hot_encoder(preds)
         
         for i in range(0, self.n_classes):
             tversky_loss = self._tversky_loss(inputs[:, i], target[:, i])
@@ -160,7 +150,7 @@ def test_batch_1(images, labels, net, classes, output_size=[256,1600], test_save
     # print(output_size)
     # print(output_size.dtype())
     thresholds_max=[0.7, 0.7,0.7,0.7,0.7]
-    thresholds_min=[0.4, 0.2,0.2,0.3,0.3]
+    thresholds_min=[0.6, 0.9,0.8,0.9,0.9]
     min_area=[1000, 500, 500, 750, 1000]
     net.eval()
     images, labels = images.cuda(), labels.cuda()
@@ -174,7 +164,7 @@ def test_batch_1(images, labels, net, classes, output_size=[256,1600], test_save
     labels = labels.cpu().detach().numpy()
     x, y = labels.shape[2:]
     labels = zoom(labels, (1, 1, output_size[0]/x, output_size[1]/y), order=0)
-    
+
     predictions = np.zeros_like(labels)
     for k in range(images.shape[0]):
         pred = batch_preds[k]
@@ -226,84 +216,40 @@ def test_batch(images, labels, net, classes, output_size=[256, 1600], test_save_
             np.savez_compressed(os.path.join(test_save_path, fname + "_pred.npz"), label = gt_label, pred = pred)
 
     metric_list = []
-    for i in range(1, classes):
+    for i in range(classes):
         # metric_list.append(calculate_metric_percase(predictions == i, labels == i))  
         metric_list.append(calculate_dice_score(predictions == i, labels == i))
 
     return metric_list
 
 
-def test_single_batch(image, label, net, classes, patch_size=[224, 224], test_save_path=None, cases=None):
-    images, labels = image.cpu().detach().numpy(), label.cpu().detach().numpy()
-    predictions = np.zeros_like(labels)
-    for ind in range(images.shape[0]):
-        img = images[ind, :, :]
-        mask = labels[ind, :, :]
-        case_name = cases[ind]
-        x, y = img.shape[0], img.shape[1]
-        if x != patch_size[0] or y != patch_size[1]:
-            img = zoom(img, (patch_size[0] / x, patch_size[1] / y), order=3)  # previous using 0
-        input = torch.from_numpy(img).unsqueeze(0).unsqueeze(0).float().cuda()
-        net.eval()
-        with torch.no_grad():
-            outputs = net(input)
-            out = torch.argmax(torch.softmax(outputs, dim=1), dim=1).squeeze(0)
-            out = out.cpu().detach().numpy()
-            if x != patch_size[0] or y != patch_size[1]:
-                pred = zoom(out, (x / patch_size[0], y / patch_size[1]), order=0)
-            else:
-                pred = out
-            predictions[ind] = pred
+# def test_single_batch(image, label, net, classes, patch_size=[224, 224], test_save_path=None, cases=None):
+#     images, labels = image.cpu().detach().numpy(), label.cpu().detach().numpy()
+#     predictions = np.zeros_like(labels)
+#     for ind in range(images.shape[0]):
+#         img = images[ind, :, :]
+#         mask = labels[ind, :, :]
+#         case_name = cases[ind]
+#         x, y = img.shape[0], img.shape[1]
+#         if x != patch_size[0] or y != patch_size[1]:
+#             img = zoom(img, (patch_size[0] / x, patch_size[1] / y), order=3)  # previous using 0
+#         input = torch.from_numpy(img).unsqueeze(0).unsqueeze(0).float().cuda()
+#         net.eval()
+#         with torch.no_grad():
+#             outputs = net(input)
+#             out = torch.argmax(torch.softmax(outputs, dim=1), dim=1).squeeze(0)
+#             out = out.cpu().detach().numpy()
+#             if x != patch_size[0] or y != patch_size[1]:
+#                 pred = zoom(out, (x / patch_size[0], y / patch_size[1]), order=0)
+#             else:
+#                 pred = out
+#             predictions[ind] = pred
 
-        if test_save_path is not None:
-            np.savez_compressed(os.path.join(test_save_path, case_name + "_pred.npz"), image = images[ind, :, :].astype(np.float32), label = mask, pred = pred)
+#         if test_save_path is not None:
+#             np.savez_compressed(os.path.join(test_save_path, case_name + "_pred.npz"), image = images[ind, :, :].astype(np.float32), label = mask, pred = pred)
     
-    metric_list = []
-    for i in range(1, classes):
-        metric_list.append(calculate_metric_percase(predictions == i, labels == i))
+#     metric_list = []
+#     for i in range(1, classes):
+#         metric_list.append(calculate_metric_percase(predictions == i, labels == i))
 
-    return metric_list
-
-
-def test_single_volume(image, label, net, classes, patch_size=[224, 224], test_save_path=None, case=None, z_spacing=1):
-    image, label = image.squeeze(0).cpu().detach().numpy(), label.squeeze(0).cpu().detach().numpy()
-    if len(image.shape) == 3:
-        prediction = np.zeros_like(label)
-        for ind in range(image.shape[0]):
-            slice = image[ind, :, :]
-            x, y = slice.shape[0], slice.shape[1]
-            if x != patch_size[0] or y != patch_size[1]:
-                slice = zoom(slice, (patch_size[0] / x, patch_size[1] / y), order=3)  # previous using 0
-            input = torch.from_numpy(slice).unsqueeze(0).unsqueeze(0).float().cuda()
-            net.eval()
-            with torch.no_grad():
-                outputs = net(input)
-                out = torch.argmax(torch.softmax(outputs, dim=1), dim=1).squeeze(0)
-                out = out.cpu().detach().numpy()
-                if x != patch_size[0] or y != patch_size[1]:
-                    pred = zoom(out, (x / patch_size[0], y / patch_size[1]), order=0)
-                else:
-                    pred = out
-                prediction[ind] = pred
-    else:
-        input = torch.from_numpy(image).unsqueeze(
-            0).unsqueeze(0).float().cuda()
-        net.eval()
-        with torch.no_grad():
-            out = torch.argmax(torch.softmax(net(input), dim=1), dim=1).squeeze(0)
-            prediction = out.cpu().detach().numpy()
-    metric_list = []
-    for i in range(1, classes):
-        metric_list.append(calculate_metric_percase(prediction == i, label == i))
-
-    if test_save_path is not None:
-        img_itk = sitk.GetImageFromArray(image.astype(np.float32))
-        prd_itk = sitk.GetImageFromArray(prediction.astype(np.float32))
-        lab_itk = sitk.GetImageFromArray(label.astype(np.float32))
-        img_itk.SetSpacing((1, 1, z_spacing))
-        prd_itk.SetSpacing((1, 1, z_spacing))
-        lab_itk.SetSpacing((1, 1, z_spacing))
-        sitk.WriteImage(prd_itk, test_save_path + '/'+case + "_pred.nii.gz")
-        sitk.WriteImage(img_itk, test_save_path + '/'+ case + "_img.nii.gz")
-        sitk.WriteImage(lab_itk, test_save_path + '/'+ case + "_gt.nii.gz")
-    return metric_list
+#     return metric_list
