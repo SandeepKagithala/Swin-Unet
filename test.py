@@ -10,7 +10,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from dataset_severstal import Severstal_dataset
-from utils import test_single_batch, test_batch, test_batch_1
+from utils import test_batch, test_batch_1
 from networks.vision_transformer import SwinUnet as ViT_seg
 from trainer import trainer_severstal
 from config import get_config
@@ -73,15 +73,15 @@ def inference(args, model, test_save_path=None):
     for i_batch, sampled_batch in tqdm(enumerate(testloader)):
         h, w = sampled_batch["image"].size()[2:]
         images, labels, case_names = sampled_batch["image"], sampled_batch["label"], sampled_batch['case_name']
-        metric_i = test_batch_1(images, labels, model, classes=args.num_classes, output_size=[args.output_size[0], args.output_size[1]],
+        metric_i = test_batch(images, labels, model, classes=args.num_classes, output_size=[args.output_size[0], args.output_size[1]],
                                       test_save_path=test_save_path, cases=case_names)
         metric_list += np.array(metric_i)
         # logging.info('batch_idx %d mean_dice %f mean_hd95 %f' % (i_batch, np.mean(metric_i, axis=0)[0], np.mean(metric_i, axis=0)[1]))
         logging.info('batch_idx %d mean_dice %f' % (i_batch, np.mean(metric_i)))
     metric_list = metric_list / len(testloader)
-    for i in range(1, args.num_classes):
+    for i in range(args.num_classes):
         # logging.info('Mean class %d mean_dice %f mean_hd95 %f' % (i, metric_list[i-1][0], metric_list[i-1][1]))
-        logging.info('Mean class %d mean_dice %f ' % (i, metric_list[i-1]))
+        logging.info('Mean class %d mean_dice %f ' % (i, metric_list[i]))
     # performance = np.mean(metric_list, axis=0)[0]
     # mean_hd95 = np.mean(metric_list, axis=0)[1]
     # logging.info('Testing performance in best val model: mean_dice : %f mean_hd95 : %f' % (performance, mean_hd95))
