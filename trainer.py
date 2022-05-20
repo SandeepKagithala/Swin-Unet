@@ -70,11 +70,12 @@ def trainer_severstal(args, model, snapshot_path):
             with torch.set_grad_enabled(True):
                 outputs = model(image_batch)
                 loss_ce = ce_loss(outputs, label_batch[:].long())
-                # loss_dice, mean_dice = dice_loss(outputs, label_batch, weight=weights, softmax=True)
-                # loss = 0.3 * loss_ce + 0.7 * loss_dice
                 # loss_ce = bce_loss(outputs, one_hot_encoder(label_batch, args.num_classes))
-                loss_tversky, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
-                loss = 0.4 * loss_ce + 0.6 * loss_tversky
+                loss_dice, mean_dice = dice_loss(outputs, label_batch, weight=weights, softmax=True)
+                # loss_tversky, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
+                loss = 0.4 * loss_ce + 0.6 * loss_dice
+                # loss = 0.4 * loss_ce + 0.6 * loss_tversky
+                
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -124,10 +125,10 @@ def trainer_severstal(args, model, snapshot_path):
                 outputs = model(image_batch)
                 loss_ce = ce_loss(outputs, label_batch[:].long())
                 # loss_ce = bce_loss(outputs, one_hot_encoder(label_batch, args.num_classes))
-                # loss_dice, mean_dice = dice_loss(outputs, label_batch, softmax=False)
-                loss_tversky, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
-                # loss = 0.3 * loss_ce + 0.7 * loss_dice
-                loss = 0.4 * loss_ce + 0.6 * loss_tversky
+                loss_dice, mean_dice = dice_loss(outputs, label_batch, weights, softmax=True)
+                # loss_tversky, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
+                loss = 0.4 * loss_ce + 0.6 * loss_dice
+                # loss = 0.4 * loss_ce + 0.6 * loss_tversky
                 val_loss_sum += loss
                 val_loss_ce_sum += loss_ce
                 val_mean_dice_sum += mean_dice
