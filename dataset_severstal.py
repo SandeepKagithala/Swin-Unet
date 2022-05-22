@@ -97,10 +97,10 @@ class Severstal_dataset(Dataset):
         self.img_transform = T.Compose([
             T.ToTensor(),
             T.Normalize(mean = (0.485, 0.456, 0.406), std = (0.229, 0.224, 0.225)),
-            T.Resize(size=output_size)
+            T.Resize(size=output_size, interpolation=T.InterpolationMode.BICUBIC)
         ])
         self.gt_transform = T.Compose([T.ToTensor(), 
-                                    #    T.Resize(size=output_size)
+                                    #    T.Resize(size=output_size, interpolation=T.InterpolationMode.NEAREST)
                                        ])
         
         self.rand_transform = A.Compose(

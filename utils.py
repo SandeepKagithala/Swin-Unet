@@ -149,21 +149,22 @@ def calculate_metric_percase(pred, gt):
 def test_batch_1(images, labels, net, classes, output_size=[256,1600], test_save_path=None, cases=None):
     # print(output_size)
     # print(output_size.dtype())
-    thresholds_max=[0.7, 0.7,0.7,0.7,0.7]
-    thresholds_min=[0.6, 0.9,0.8,0.9,0.9]
-    min_area=[1000, 500, 500, 750, 1000]
+    # thresholds_max=[0.7, 0.7,0.7,0.7,0.7]
+    thresholds_min=[0.8, 0.8,0.8,0.8,0.9]
+    min_area=[500, 500, 500, 500, 500]
     net.eval()
     images, labels = images.cuda(), labels.cuda()
     with torch.no_grad():
         batch_preds = net(images)
-        batch_preds = T.Resize(size=output_size)(batch_preds)
-        batch_preds = torch.sigmoid(batch_preds).detach().cpu().numpy()
+        batch_preds = torch.sigmoid(batch_preds)
+        batch_preds = T.Resize(size=output_size, interpolation=T.InterpolationMode.NEAREST)(batch_preds)
+        batch_preds = batch_preds.detach().cpu().numpy()
     
-    # labels = T.Resize(size=output_size)(labels)
+    labels = T.Resize(size=output_size, interpolation=T.InterpolationMode.NEAREST)(labels)
     labels = one_hot_encoder(labels, classes)
     labels = labels.cpu().detach().numpy()
-    x, y = labels.shape[2:]
-    labels = zoom(labels, (1, 1, output_size[0]/x, output_size[1]/y), order=0)
+    # x, y = labels.shape[2:]
+    # labels = zoom(labels, (1, 1, output_size[0]/x, output_size[1]/y), order=0)
 
     predictions = np.zeros_like(labels)
     for k in range(images.shape[0]):
@@ -173,12 +174,12 @@ def test_batch_1(images, labels, net, classes, output_size=[256,1600], test_save
         pred_masks = []
         for i in range(classes):
             p_channel = pred[i]
-            p_channel_ = p_channel
-            p_channel = (p_channel>thresholds_max[i]).astype(np.uint8)
-            if p_channel.sum() < min_area[i]:
-                p_channel = np.zeros(p_channel.shape, dtype=p_channel.dtype)
-            else:
-                p_channel = (p_channel_>thresholds_min[i]).astype(np.uint8)
+            # p_channel_ = p_channel
+            # p_channel = (p_channel>thresholds_max[i]).astype(np.uint8)
+            # if p_channel.sum() < min_area[i]:
+            #     p_channel = np.zeros(p_channel.shape, dtype=p_channel.dtype)
+            # else:
+            p_channel = (p_channel > thresholds_min[i]).astype(np.uint8)
             pred_masks.append(p_channel)
         pred_masks = np.array(pred_masks)
         predictions[k] = pred_masks
@@ -202,11 +203,13 @@ def test_batch(images, labels, net, classes, output_size=[256, 1600], test_save_
         batch_preds = net(images)
         predictions = torch.argmax(torch.softmax(batch_preds, dim=1), dim=1)
     
+    predictions = T.Resize(size=output_size, interpolation=T.InterpolationMode.NEAREST)(predictions)
+    labels = T.Resize(size=output_size, interpolation=T.InterpolationMode.NEAREST)(labels)
     predictions = predictions.cpu().detach().numpy()
     labels = labels.cpu().detach().numpy()
-    x,y = predictions.shape[1:]
-    predictions = zoom(predictions, (1, output_size[0]/x, output_size[1]/y), order=0)
-    labels = zoom(labels, (1, output_size[0]/x, output_size[1]/y), order=0)
+    x,y = labels.shape[1:]
+    # predictions = zoom(predictions, (1, output_size[0]/x, output_size[1]/y), order=0)
+    # labels = zoom(labels, (1, output_size[0]/x, output_size[1]/y), order=0)
     
     if test_save_path is not None:
         for k in range(images.shape[0]):
@@ -221,6 +224,22 @@ def test_batch(images, labels, net, classes, output_size=[256, 1600], test_save_
         metric_list.append(calculate_dice_score(predictions == i, labels == i))
 
     return metric_list
+
+
+# class Model:
+#     def __init__(self, models):
+#         self.models = models
+    
+#     def __call__(self, x):
+#         res = []
+#         x = x.cuda()
+#         with torch.no_grad():
+#             for m in self.models:
+#                 res.append(m(x))
+#         res = torch.stack(res)
+#         return torch.mean(res, dim=0)
+
+# model = Model([unet_se_resnext50_32x4d, unet_mobilenet2, unet_resnet34])
 
 
 # def test_single_batch(image, label, net, classes, patch_size=[224, 224], test_save_path=None, cases=None):

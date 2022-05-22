@@ -56,6 +56,7 @@ def trainer_severstal(args, model, snapshot_path):
     max_iterations = args.max_epochs * len(trainloader)  # max_epoch = max_iterations // len(trainloader) + 1
     logging.info("{} iterations per epoch. {} max iterations ".format(len(trainloader), max_iterations))
     best_mean_dice = 0
+    best_loss = np.Inf
     weights=[1, 1.4, 1, 1.4, 1]
     iterator = tqdm(range(max_epoch), ncols=70)
     for epoch_num in iterator:
@@ -71,11 +72,13 @@ def trainer_severstal(args, model, snapshot_path):
                 outputs = model(image_batch)
                 loss_ce = ce_loss(outputs, label_batch[:].long())
                 # loss_ce = bce_loss(outputs, one_hot_encoder(label_batch, args.num_classes))
-                loss_dice, mean_dice = dice_loss(outputs, label_batch, weight=weights, softmax=True)
-                # loss_tversky, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
-                loss = 0.4 * loss_ce + 0.6 * loss_dice
-                # loss = 0.4 * loss_ce + 0.6 * loss_tversky
-                
+                if epoch_num < 80:
+                    loss_seg, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
+                else:
+                    loss_seg, mean_dice = dice_loss(outputs, label_batch, weights, softmax=True)
+
+                loss = 0.4 * loss_ce + 0.6 * loss_seg
+
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -125,10 +128,13 @@ def trainer_severstal(args, model, snapshot_path):
                 outputs = model(image_batch)
                 loss_ce = ce_loss(outputs, label_batch[:].long())
                 # loss_ce = bce_loss(outputs, one_hot_encoder(label_batch, args.num_classes))
-                loss_dice, mean_dice = dice_loss(outputs, label_batch, weights, softmax=True)
-                # loss_tversky, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
-                loss = 0.4 * loss_ce + 0.6 * loss_dice
-                # loss = 0.4 * loss_ce + 0.6 * loss_tversky
+                if epoch_num < 80:
+                    loss_seg, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
+                else:
+                    loss_seg, mean_dice = dice_loss(outputs, label_batch, weights, softmax=True)
+
+                loss = 0.4 * loss_ce + 0.6 * loss_seg
+                
                 val_loss_sum += loss
                 val_loss_ce_sum += loss_ce
                 val_mean_dice_sum += mean_dice
@@ -150,6 +156,13 @@ def trainer_severstal(args, model, snapshot_path):
                 torch.save(model.state_dict(), save_mode_path)
                 logging.info("Best Model saved to {}".format(save_mode_path))
 
+        if avg_loss < best_loss:
+            best_loss = avg_loss
+            if epoch_num > 10:
+                logging.info("Best Loss found at epoch {}".format(epoch_num + 1))
+                save_mode_path = os.path.join(snapshot_path, 'best_loss_model' + '.pth')
+                torch.save(model.state_dict(), save_mode_path)
+                logging.info("Best Loss Model saved to {}".format(save_mode_path))
 
         save_interval = 50  # int(max_epoch/6)
         if epoch_num > int(max_epoch / 2) and (epoch_num + 1) % save_interval == 0:
