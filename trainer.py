@@ -72,10 +72,10 @@ def trainer_severstal(args, model, snapshot_path):
                 outputs = model(image_batch)
                 loss_ce = ce_loss(outputs, label_batch[:].long())
                 # loss_ce = bce_loss(outputs, one_hot_encoder(label_batch, args.num_classes))
-                if epoch_num < 80:
-                    loss_seg, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
-                else:
-                    loss_seg, mean_dice = dice_loss(outputs, label_batch, weights, softmax=True)
+                # if epoch_num < 80:
+                #     loss_seg, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
+                # else:
+                loss_seg, mean_dice = dice_loss(outputs, label_batch, weights, softmax=True)
 
                 loss = 0.4 * loss_ce + 0.6 * loss_seg
 
@@ -128,10 +128,10 @@ def trainer_severstal(args, model, snapshot_path):
                 outputs = model(image_batch)
                 loss_ce = ce_loss(outputs, label_batch[:].long())
                 # loss_ce = bce_loss(outputs, one_hot_encoder(label_batch, args.num_classes))
-                if epoch_num < 80:
-                    loss_seg, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
-                else:
-                    loss_seg, mean_dice = dice_loss(outputs, label_batch, weights, softmax=True)
+                # if epoch_num < 80:
+                #     loss_seg, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
+                # else:
+                loss_seg, mean_dice = dice_loss(outputs, label_batch, weights, softmax=True)
 
                 loss = 0.4 * loss_ce + 0.6 * loss_seg
                 
