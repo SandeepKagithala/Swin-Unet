@@ -203,13 +203,13 @@ def test_batch(images, labels, net, classes, output_size=[256, 1600], test_save_
         batch_preds = net(images)
         predictions = torch.argmax(torch.softmax(batch_preds, dim=1), dim=1)
     
-    predictions = T.Resize(size=output_size, interpolation=T.InterpolationMode.NEAREST)(predictions)
-    labels = T.Resize(size=output_size, interpolation=T.InterpolationMode.NEAREST)(labels)
+    # predictions = T.Resize(size=output_size, interpolation=T.InterpolationMode.NEAREST)(predictions)
+    # labels = T.Resize(size=output_size, interpolation=T.InterpolationMode.NEAREST)(labels)
     predictions = predictions.cpu().detach().numpy()
     labels = labels.cpu().detach().numpy()
     x,y = labels.shape[1:]
-    # predictions = zoom(predictions, (1, output_size[0]/x, output_size[1]/y), order=0)
-    # labels = zoom(labels, (1, output_size[0]/x, output_size[1]/y), order=0)
+    predictions = zoom(predictions, (1, output_size[0]/x, output_size[1]/y), order=0)
+    labels = zoom(labels, (1, output_size[0]/x, output_size[1]/y), order=0)
     
     if test_save_path is not None:
         for k in range(images.shape[0]):

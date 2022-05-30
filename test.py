@@ -9,6 +9,7 @@ import torch.backends.cudnn as cudnn
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import time
 from dataset_severstal import Severstal_dataset
 from utils import test_batch, test_batch_1
 from networks.vision_transformer import SwinUnet as ViT_seg
@@ -65,6 +66,7 @@ config = get_config(args)
 
 
 def inference(args, model, test_save_path=None):
+    start_time = time.time()
     db_test = args.Dataset(base_dir=args.test_images_dir, list_dir=args.list_dir, split="test", output_size=(args.img_size, args.img_size))
     testloader = DataLoader(db_test, batch_size=24, shuffle=False, num_workers=1)
     logging.info("{} test iterations per epoch".format(len(testloader)))
@@ -87,6 +89,8 @@ def inference(args, model, test_save_path=None):
     # logging.info('Testing performance in best val model: mean_dice : %f mean_hd95 : %f' % (performance, mean_hd95))
     performance = np.mean(metric_list)
     logging.info('Testing performance in best val model: mean_dice : %f ' % (performance))
+    elapsed_time = time.time() - start_time
+    logging.info("Test Time in Seconds : {}".format(round(elapsed_time, 2)))
     return "Testing Finished!"
 
 
