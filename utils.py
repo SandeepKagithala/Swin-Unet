@@ -45,13 +45,13 @@ class DiceLoss(nn.Module):
         class_wise_dice = []
         loss = 0.0
 
-        preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
-        preds = self._one_hot_encoder(preds)
+        # preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
+        # preds = self._one_hot_encoder(preds)
 
         for i in range(0, self.n_classes):
             dice = self._dice_loss(inputs[:, i], target[:, i])
-            dice2 = self._dice_loss(preds[:, i], target[:, i])
-            class_wise_dice.append(1.0 - dice2.item())
+            # dice2 = self._dice_loss(preds[:, i], target[:, i])
+            class_wise_dice.append(1.0 - dice.item())
             # class_wise_dice.append(calculate_metric_percase(preds == i, labels == i))
             loss += dice * weight[i]
         mean_dice = sum(class_wise_dice)/self.n_classes
@@ -106,12 +106,12 @@ class TverskyLoss(nn.Module):
         class_wise_dice = []
         loss = 0.0
 
-        preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
-        preds = self._one_hot_encoder(preds)
+        # preds = torch.argmax(torch.softmax(inputs, dim=1), dim=1)
+        # preds = self._one_hot_encoder(preds)
         
         for i in range(0, self.n_classes):
             tversky_loss = self._tversky_loss(inputs[:, i], target[:, i])
-            dice = self._dice_coeff(preds[:, i], target[:, i])
+            dice = self._dice_coeff(inputs[:, i], target[:, i])
             class_wise_dice.append(dice.item())
             loss += tversky_loss * weight[i]
         mean_dice = sum(class_wise_dice)/self.n_classes
@@ -149,8 +149,8 @@ def calculate_metric_percase(pred, gt):
 def test_batch_1(images, labels, net, classes, output_size=[256,1600], test_save_path=None, cases=None):
     # print(output_size)
     # print(output_size.dtype())
-    # thresholds_max=[0.7, 0.7,0.7,0.7,0.7]
-    thresholds_min=[0.8, 0.8,0.8,0.8,0.9]
+    thresholds_max=[0.7, 0.7,0.7,0.7,0.7]
+    thresholds_min=[0.3, 0.2,0.2,0.2,0.4]
     min_area=[500, 500, 500, 500, 500]
     net.eval()
     images, labels = images.cuda(), labels.cuda()
@@ -174,12 +174,12 @@ def test_batch_1(images, labels, net, classes, output_size=[256,1600], test_save
         pred_masks = []
         for i in range(classes):
             p_channel = pred[i]
-            # p_channel_ = p_channel
-            # p_channel = (p_channel>thresholds_max[i]).astype(np.uint8)
-            # if p_channel.sum() < min_area[i]:
-            #     p_channel = np.zeros(p_channel.shape, dtype=p_channel.dtype)
-            # else:
-            p_channel = (p_channel > thresholds_min[i]).astype(np.uint8)
+            p_channel_ = p_channel
+            p_channel = (p_channel>thresholds_max[i]).astype(np.uint8)
+            if p_channel.sum() < min_area[i]:
+                p_channel = np.zeros(p_channel.shape, dtype=p_channel.dtype)
+            else:
+                p_channel = (p_channel > thresholds_min[i]).astype(np.uint8)
             pred_masks.append(p_channel)
         pred_masks = np.array(pred_masks)
         predictions[k] = pred_masks

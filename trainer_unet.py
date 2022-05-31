@@ -15,9 +15,10 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from utils import DiceLoss, TverskyLoss, one_hot_encoder
 from torchvision import transforms
-from dataset_severstal import Severstal_dataset, RandomGenerator
+from dataset_severstal import Severstal_dataset
+import segmentation_models_pytorch as smp
 
-def trainer_severstal(args, model, snapshot_path):
+def trainer_severstal(args, snapshot_path):
     
     logging.basicConfig(filename=snapshot_path + "/log_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".log", level=logging.INFO,
                         format='[%(asctime)s.%(msecs)03d] %(message)s', datefmt='%H:%M:%S')
@@ -28,29 +29,33 @@ def trainer_severstal(args, model, snapshot_path):
     logging.info(str(args))
     base_lr = args.base_lr
     num_classes = args.num_classes
-    batch_size = args.batch_size * args.n_gpu
+    batch_size = args.batch_size
     # max_iterations = args.max_iterations
-    db_train = Severstal_dataset(base_dir=args.root_path, list_dir=args.list_dir, split="train", output_size=(args.img_size, args.img_size))
-    db_val = Severstal_dataset(base_dir=args.root_path, list_dir=args.list_dir, split="val", output_size=(args.img_size, args.img_size))
+    db_train = Severstal_dataset(base_dir=args.root_path, list_dir=args.list_dir, split="train", output_size=(256,320))
+    db_val = Severstal_dataset(base_dir=args.root_path, list_dir=args.list_dir, split="val", output_size=(256,320))
 
     print("The length of train set is: {}".format(len(db_train)))
     print("The length of validation set is: {}".format(len(db_val)))
-
-    def worker_init_fn(worker_id):
-        random.seed(args.seed + worker_id)
 
     #trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=8, worker_init_fn=worker_init_fn)
     trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers = 2)
     valloader = DataLoader(db_val, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers = 2)
 
-    if args.n_gpu > 1:
-        model = nn.DataParallel(model)
+    aux_params=dict(
+        pooling='avg',             # one of 'avg', 'max'
+        dropout=0.2,               # dropout ratio, default is None
+        activation='sigmoid',      # activation function, default is None
+        classes=5,                 # define number of output labels
+    )
+    model = smp.Unet('resnet34', classes=5, aux_params=aux_params)
+
     ce_loss = CrossEntropyLoss()
     bce_loss = BCEWithLogitsLoss()
     dice_loss = DiceLoss(num_classes)
     tversky_loss = TverskyLoss(num_classes)
     # optimizer = optim.SGD(model.parameters(), lr=base_lr, momentum=0.9, weight_decay=0.0001)
     optimizer = optim.Adam(model.parameters(), lr=base_lr, betas=(0.9,0.999), weight_decay=0.0001)
+
     writer = SummaryWriter(snapshot_path + '/log/' + datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
     iter_num = 0
     max_epoch = args.max_epochs
@@ -74,9 +79,9 @@ def trainer_severstal(args, model, snapshot_path):
                 # loss_ce = ce_loss(outputs, label_batch[:].long())
                 loss_ce = bce_loss(outputs, one_hot_encoder(label_batch, args.num_classes))
                 # if epoch_num < 80:
-                loss_seg, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
+                # loss_seg, mean_dice = tversky_loss(outputs, label_batch, weights, softmax=False)
                 # else:
-                # loss_seg, mean_dice = dice_loss(outputs, label_batch, weights, softmax=True)
+                loss_seg, mean_dice = dice_loss(outputs, label_batch, weights, softmax=False)
 
                 loss = 0.4 * loss_ce + 0.6 * loss_seg
 
@@ -97,15 +102,15 @@ def trainer_severstal(args, model, snapshot_path):
             train_mean_dice_sum += mean_dice
             # logging.info('iteration %d : loss : %f, loss_ce: %f, mean_dice: %f' % (iter_num, loss.item(), loss_ce.item(), mean_dice))
 
-            if iter_num % 20 == 0:
-                image = image_batch[1, 0:1, :, :]
-                image = (image - image.min()) / (image.max() - image.min())
-                writer.add_image('train/Image', image, iter_num)
-                outputs = torch.argmax(torch.softmax(outputs, dim=1), dim=1, keepdim=True)
-                # outputs = torch.sigmoid(outputs)
-                writer.add_image('train/Prediction', outputs[1, ...] * 50, iter_num)
-                labs = label_batch[1, ...].unsqueeze(0) * 50
-                writer.add_image('train/GroundTruth', labs, iter_num)
+            # if iter_num % 20 == 0:
+            #     image = image_batch[1, 0:1, :, :]
+            #     image = (image - image.min()) / (image.max() - image.min())
+            #     writer.add_image('train/Image', image, iter_num)
+            #     outputs = torch.argmax(torch.softmax(outputs, dim=1), dim=1, keepdim=True)
+            #     # outputs = torch.sigmoid(outputs)
+            #     writer.add_image('train/Prediction', outputs[1, ...] * 50, iter_num)
+            #     labs = label_batch[1, ...].unsqueeze(0) * 50
+            #     writer.add_image('train/GroundTruth', labs, iter_num)
 
         avg_train_loss = train_loss_sum / len(trainloader)
         avg_train_loss_ce = train_loss_ce_sum / len(trainloader)
