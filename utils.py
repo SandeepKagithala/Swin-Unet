@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from medpy import metric
+# from medpy import metric
 from scipy.ndimage import zoom
 import torch.nn as nn
 import SimpleITK as sitk
@@ -134,17 +134,17 @@ def one_hot_encoder(input_tensor, num_classes):
         output_tensor = torch.cat(tensor_list, dim=1)
         return output_tensor.float()
 
-def calculate_metric_percase(pred, gt):
-    pred[pred > 0] = 1
-    gt[gt > 0] = 1
-    if pred.sum() > 0 and gt.sum()>0:
-        dice = metric.binary.dc(pred, gt)
-        hd95 = metric.binary.hd95(pred, gt)
-        return dice, hd95
-    elif pred.sum() > 0 and gt.sum()==0:
-        return 1, 0
-    else:
-        return 0, 0
+# def calculate_metric_percase(pred, gt):
+#     pred[pred > 0] = 1
+#     gt[gt > 0] = 1
+#     if pred.sum() > 0 and gt.sum()>0:
+#         dice = metric.binary.dc(pred, gt)
+#         hd95 = metric.binary.hd95(pred, gt)
+#         return dice, hd95
+#     elif pred.sum() > 0 and gt.sum()==0:
+#         return 1, 0
+#     else:
+#         return 0, 0
 
 def test_batch_1(images, labels, net, classes, output_size=[256,1600], test_save_path=None, cases=None):
     # print(output_size)

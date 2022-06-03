@@ -7,6 +7,7 @@ import torch
 import torch.backends.cudnn as cudnn
 from trainer_unet import trainer_severstal
 from config import get_config
+import segmentation_models_pytorch as smp
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--root_path', type=str,
@@ -33,12 +34,14 @@ parser.add_argument('--img_size', type=int,
                     default=256, help='input patch size of network input')
 parser.add_argument('--seed', type=int,
                     default=1234, help='random seed')
+parser.add_argument('--cfg', type=str, default='configs/swin_tiny_patch4_window7_224_lite.yaml', required=True, metavar="FILE", help='path to config file', )
 
 args = parser.parse_args()
 # print("Image Size before Initiation: {}".format(args.img_size))
 # if args.dataset == "Severstal":
 #     args.root_path = os.path.join(args.root_path)
-config = get_config(args)
+
+# config = get_config(args)
 
 
 if __name__ == "__main__":
@@ -71,14 +74,21 @@ if __name__ == "__main__":
 
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
-    net = ViT_seg(config, img_size=args.img_size, num_classes=args.num_classes).cuda()
+    # net = ViT_seg(config, img_size=args.img_size, num_classes=args.num_classes).cuda()
+
+    aux_params=dict(
+        dropout=0.2,               # dropout ratio, default is None
+        activation='sigmoid',      # activation function, default is None
+        classes=5,                 # define number of output labels
+    )
+    net = smp.Unet('resnet34', classes=5, aux_params=aux_params)
     
-    pretrained_path = config.MODEL.PRETRAIN_CKPT
-    if 'best_model' in pretrained_path:
-        msg = net.load_state_dict(torch.load(pretrained_path))
-        print("Using Self Trained swin unet : ",msg)
-    else:
-        net.load_from(config)
+    # pretrained_path = config.MODEL.PRETRAIN_CKPT
+    # if 'best_model' in pretrained_path:
+    #     msg = net.load_state_dict(torch.load(pretrained_path))
+    #     print("Using Self Trained swin unet : ",msg)
+    # else:
+    #     net.load_from(config)
 
     trainer = {'Severstal': trainer_severstal,}
     trainer[dataset_name](args, net, args.output_dir)

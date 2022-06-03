@@ -17,8 +17,9 @@ from utils import DiceLoss, TverskyLoss, one_hot_encoder
 from torchvision import transforms
 from dataset_severstal import Severstal_dataset
 import segmentation_models_pytorch as smp
+import torchvision.transforms as T
 
-def trainer_severstal(args, snapshot_path):
+def trainer_severstal(args, model, snapshot_path):
     
     logging.basicConfig(filename=snapshot_path + "/log_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".log", level=logging.INFO,
                         format='[%(asctime)s.%(msecs)03d] %(message)s', datefmt='%H:%M:%S')
@@ -40,14 +41,6 @@ def trainer_severstal(args, snapshot_path):
     #trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=8, worker_init_fn=worker_init_fn)
     trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers = 2)
     valloader = DataLoader(db_val, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers = 2)
-
-    aux_params=dict(
-        pooling='avg',             # one of 'avg', 'max'
-        dropout=0.2,               # dropout ratio, default is None
-        activation='sigmoid',      # activation function, default is None
-        classes=5,                 # define number of output labels
-    )
-    model = smp.Unet('resnet34', classes=5, aux_params=aux_params)
 
     ce_loss = CrossEntropyLoss()
     bce_loss = BCEWithLogitsLoss()
@@ -73,9 +66,10 @@ def trainer_severstal(args, snapshot_path):
         train_mean_dice_sum = 0
         for i_batch, sampled_batch in enumerate(trainloader):
             image_batch, label_batch = sampled_batch['image'], sampled_batch['label']
-            image_batch, label_batch = image_batch.cuda(), label_batch.cuda()
+            # image_batch, label_batch = image_batch.cuda(), label_batch.cuda()
             with torch.set_grad_enabled(True):
                 outputs = model(image_batch)
+                outputs = torch.stack(list(outputs), dim=0)
                 # loss_ce = ce_loss(outputs, label_batch[:].long())
                 loss_ce = bce_loss(outputs, one_hot_encoder(label_batch, args.num_classes))
                 # if epoch_num < 80:
@@ -100,7 +94,7 @@ def trainer_severstal(args, snapshot_path):
             train_loss_sum += loss
             train_loss_ce_sum += loss_ce
             train_mean_dice_sum += mean_dice
-            # logging.info('iteration %d : loss : %f, loss_ce: %f, mean_dice: %f' % (iter_num, loss.item(), loss_ce.item(), mean_dice))
+            logging.info('iteration %d : loss : %f, loss_ce: %f, mean_dice: %f' % (iter_num, loss.item(), loss_ce.item(), mean_dice))
 
             # if iter_num % 20 == 0:
             #     image = image_batch[1, 0:1, :, :]
@@ -132,6 +126,7 @@ def trainer_severstal(args, snapshot_path):
 
             with torch.no_grad():
                 outputs = model(image_batch)
+                outputs = torch.stack(list(outputs), dim=0)
                 # loss_ce = ce_loss(outputs, label_batch[:].long())
                 loss_ce = bce_loss(outputs, one_hot_encoder(label_batch, args.num_classes))
                 # if epoch_num < 80:
